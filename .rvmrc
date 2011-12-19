@@ -1,0 +1,3 @@
+rvm use 1.9.2
+alias rake="bundle exec rake"
+alias spec="bundle exec rspec"
