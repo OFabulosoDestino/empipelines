@@ -67,8 +67,8 @@ end
 
 desc "Resets localhost's rabbitmq"
 task :reset_rabbitmq do
-  sh 'rabbitmqctl stop_app'
-  sh 'rabbitmqctl reset'
+  sh 'rabbitmqctl stop_app; echo 0'
+  sh 'rabbitmqctl reset; echo 0'
   sh 'rabbitmqctl start_app'
 end
 
