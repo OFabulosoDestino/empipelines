@@ -1,0 +1,7 @@
+tmp/*
+*.swp
+config
+.bundle
+.rvmrc
+.DS_Store
+vendor
