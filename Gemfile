@@ -1,4 +1,4 @@
-source :rubygems
+source :gemcutter
 
 gem 'rake'
 gem 'json'
