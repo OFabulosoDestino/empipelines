@@ -1,6 +1,6 @@
 require 'empipelines/periodic_event_source'
 
-module Pipelines
+module EmPipelines
   describe PeriodicEventSource do
     it 'schedules itself with eventmachine' do
       em = stub('eventmachine')

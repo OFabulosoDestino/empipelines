@@ -1,6 +1,6 @@
 require 'json'
 
-module Pipelines
+module EmPipelines
   class AmqpEventSource
     def initialize(queue, event_name)
       @queue, @event_name = queue, event_name

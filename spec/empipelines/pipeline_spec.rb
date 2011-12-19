@@ -1,6 +1,6 @@
 require "empipelines/pipeline"
 
-module Pipelines
+module EmPipelines
   class AddOne
     def call(input, &next_stage)
       next_stage.call({:data => (input[:data] + 1)})

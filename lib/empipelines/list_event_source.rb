@@ -1,4 +1,4 @@
-module Pipelines
+module EmPipelines
   class ListEventSource
     def initialize(events)
       @events = events

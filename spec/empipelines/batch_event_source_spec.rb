@@ -1,6 +1,6 @@
 require 'empipelines/batch_event_source'
 
-module Pipelines
+module EmPipelines
   describe BatchEventSource do
 
     let (:em) do

@@ -1,4 +1,4 @@
-module Pipelines
+module EmPipelines
   class PeriodicEventSource
     def initialize(em, interval_in_secs, &event_sourcing_code)
       @em, @interval_in_secs, @event_sourcing_code = em, interval_in_secs, event_sourcing_code

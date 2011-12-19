@@ -1,6 +1,6 @@
 require 'empipelines/amqp_event_source'
 
-module Pipelines
+module EmPipelines
   class StubQueue
     def subscribe(&code)
       @code = code

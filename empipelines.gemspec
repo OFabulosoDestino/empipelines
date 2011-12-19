@@ -35,6 +35,8 @@ Gem::Specification.new do |s|
     Gemfile.lock
     README.md
     Rakefile
+    empipelines.gemspec
+    lib/empipelines.rb
     lib/empipelines/amqp_event_source.rb
     lib/empipelines/batch_event_source.rb
     lib/empipelines/event_pipeline.rb

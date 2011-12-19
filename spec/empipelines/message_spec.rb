@@ -1,6 +1,6 @@
 require 'empipelines/message'
 
-module Pipelines
+module EmPipelines
   describe Message do
     context "mostly behaves like a hashmap" do
       it "stores values under symbolised keys" do

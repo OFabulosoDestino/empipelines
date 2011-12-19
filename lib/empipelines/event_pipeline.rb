@@ -1,4 +1,4 @@
-module Pipelines
+module EmPipelines
   class EventPipeline
     def initialize(source, pipeline, monitoring)
       @source, @pipeline, @monitoring = source, pipeline, monitoring

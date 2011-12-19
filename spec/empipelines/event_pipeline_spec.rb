@@ -1,6 +1,6 @@
 require 'empipelines/event_pipeline'
 
-module Pipelines
+module EmPipelines
   class StubSource
     def initialize(event_data)
       @event_data = event_data

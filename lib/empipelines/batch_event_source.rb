@@ -1,4 +1,4 @@
-module Pipelines
+module EmPipelines
   class BatchEventSource
     def initialize(em, events)
       @em, @events = em, events

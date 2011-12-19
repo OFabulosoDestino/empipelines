@@ -1,4 +1,4 @@
-module Pipelines
+module EmPipelines
   class Message
     def initialize(base_hash={})
       hash!(base_hash)

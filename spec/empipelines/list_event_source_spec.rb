@@ -1,6 +1,6 @@
 require 'empipelines/list_event_source'
 
-module Pipelines
+module EmPipelines
   describe ListEventSource do
     it 'sends each element of the list to the handler' do
       items = [1, 2, 3, 4, 5, 6]

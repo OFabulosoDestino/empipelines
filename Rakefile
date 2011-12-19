@@ -49,6 +49,7 @@ end
 # Standard tasks
 #
 #############################################################################
+task :default => :pre_checkin
 
 Cucumber::Rake::Task.new(:non_wip_features) do |t|
   t.cucumber_opts = "--format pretty --tag ~@wip"
@@ -85,8 +86,6 @@ task :ci => [:specs, :features, :build]
 
 desc "MUST BE RUN (AND PASS!) BEFORE CHECKING IN CODE!"
 task :pre_checkin => [:reset_rabbitmq, :ci]
-
-task :default => :pre_checkin
 
 #############################################################################
 #
