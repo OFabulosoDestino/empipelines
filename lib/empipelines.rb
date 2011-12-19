@@ -1,3 +1,3 @@
-module EmEmPipelines
-  VERSION = '0.1'
+module EmPipelines
+  VERSION = '0.1.1.1'
 end
