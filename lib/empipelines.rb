@@ -1,5 +1,5 @@
 module EmPipelines
-  VERSION = '0.1.1.1'
+  VERSION = '0.2'
 end
 
 require 'empipelines/amqp_event_source'

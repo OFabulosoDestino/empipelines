@@ -4,8 +4,8 @@ Gem::Specification.new do |s|
   s.rubygems_version = '1.3.5'
   ## Leave these as is they will be modified for you by the rake gemspec task.
   s.name              = 'empipelines'
-  s.version           = '0.1.1.1'
-  s.date              = '2011-12-19'
+  s.version           = '0.2'
+  s.date              = '2011-12-20'
   s.rubyforge_project = 'empipelines'
 
   s.summary           = "Simple Event Handling Pipeline Architecture for EventMachine"
@@ -35,7 +35,6 @@ Gem::Specification.new do |s|
     Gemfile.lock
     README.md
     Rakefile
-    empipelines-0.1.1.1.gem
     empipelines.gemspec
     lib/empipelines.rb
     lib/empipelines/amqp_event_source.rb
