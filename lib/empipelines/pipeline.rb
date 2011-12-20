@@ -6,8 +6,8 @@ module EmPipelines
       end
     end
     
-    def initialize(spawner, context, monitoring, logger)
-      @spawner = spawner
+    def initialize(em, context, monitoring, logger)
+      @em = em
       @logger = logger
       @context = context
       @monitoring = monitoring
@@ -20,7 +20,7 @@ module EmPipelines
       logger = @logger
       
       first_stage_process = stages.reverse.reduce(TerminatorStage) do |current_head, next_stage|
-        @spawner.spawn do |input|
+        @em.spawn do |input|
           begin
             logger.debug "#{next_stage.class}#notify with #{input}}"
             next_stage.call(input) do |output|

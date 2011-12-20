@@ -29,7 +29,7 @@ module EmPipelines
 
       has_finished = []
 
-      source.on_batch_finished do |messages|
+      source.on_finished do |messages|
         has_finished << messages
       end
 
@@ -42,11 +42,11 @@ module EmPipelines
       has_finished.first.map{ |i| i[:payload] }.should ==(events)
     end
 
-    it "finishes straight away if there are no events to process" do
+    it "finishes immediately if there are no events to process" do
       source = BatchEventSource.new(em, [])
 
       has_finished = []
-      source.on_batch_finished do |messages|
+      source.on_finished do |messages|
         has_finished << true
       end
 
@@ -59,11 +59,11 @@ module EmPipelines
       has_finished.first.should be_true
     end
 
-    it "does not call the batch finished callback if not all of the  items were processed" do
+    it "only calls the finished handler if all events were processed" do
       events = [1,2,3,4,5,6,7,8,9,10]
       source = BatchEventSource.new(em, events)
 
-      source.on_batch_finished do |messages|
+      source.on_finished do |messages|
         raise "should not be called"
       end
 

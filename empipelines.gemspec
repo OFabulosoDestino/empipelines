@@ -44,15 +44,15 @@ Gem::Specification.new do |s|
     lib/empipelines/message.rb
     lib/empipelines/periodic_event_source.rb
     lib/empipelines/pipeline.rb
-    spec/empipelines/amqp_event_source_spec.rb
-    spec/empipelines/batch_event_source_spec.rb
-    spec/empipelines/event_pipeline_spec.rb
-    spec/empipelines/list_event_source_spec.rb
-    spec/empipelines/message_spec.rb
-    spec/empipelines/periodic_event_source_spec.rb
-    spec/empipelines/pipeline_spec.rb
-    spec/spec_helper.rb
-    spec/stage_helper.rb
+    unit/empipelines/amqp_event_source_spec.rb
+    unit/empipelines/batch_event_source_spec.rb
+    unit/empipelines/event_pipeline_spec.rb
+    unit/empipelines/list_event_source_spec.rb
+    unit/empipelines/message_spec.rb
+    unit/empipelines/periodic_event_source_spec.rb
+    unit/empipelines/pipeline_spec.rb
+    unit/spec_helper.rb
+    unit/stage_helper.rb
   ]
   # = MANIFEST =
 

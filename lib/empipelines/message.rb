@@ -1,5 +1,7 @@
 module EmPipelines
   class Message
+    attr_reader :state
+    
     def initialize(base_hash={})
       hash!(base_hash)
       created!
