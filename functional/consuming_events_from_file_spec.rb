@@ -10,7 +10,7 @@ module TestStages
     include EmRunner
 
     it 'consumes all events from the file' do
-      with_em_run do      
+      with_em_run do
         pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring, logger)
 
         file_name = File.join(File.dirname(__FILE__), 'events.dat')
