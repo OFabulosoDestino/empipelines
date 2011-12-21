@@ -1,5 +1,5 @@
 module EmPipelines
-  VERSION = '0.2'
+  VERSION = '0.2.1'
 end
 
 require 'empipelines/event_handlers'

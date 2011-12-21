@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = '1.3.5'
   ## Leave these as is they will be modified for you by the rake gemspec task.
   s.name              = 'empipelines'
-  s.version           = '0.2'
+  s.version           = '0.2.1'
   s.date              = '2011-12-21'
   s.rubyforge_project = 'empipelines'
 
