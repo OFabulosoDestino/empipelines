@@ -1,21 +1,45 @@
-require "empipelines/pipeline"
+require 'empipelines/pipeline'
+
+def msg(some_map)
+  EmPipelines:: MessageMock.new(some_map)
+end
 
 module EmPipelines
+  class MessageMock < EmPipelines::Message
+    def consumed!
+      raise 'unexpected call'
+    end
+    
+    def rejected!
+      raise 'unexpected call'
+    end
+
+    def broken!
+      raise 'unexpected call'
+    end
+  end
+
   class AddOne
     def call(input, &next_stage)
-      next_stage.call({:data => (input[:data] + 1)})
+      next_stage.call(input.merge({:data => (input[:data] + 1)}))
+    end
+  end
+
+  class Passthrough
+    def call(input, &next_stage)
+      next_stage.call(input)
     end
   end
 
   class SquareIt
     def call(input, &next_stage)
-      next_stage.call({:data => (input[:data] * input[:data])})
+      next_stage.call(input.merge({:data => (input[:data] * input[:data])}))
     end
   end
 
   class BrokenStage
     def call(ignore, &ignored_too)
-      raise "Boo!"
+      raise 'Boo!'
     end
   end
 
@@ -49,7 +73,7 @@ module EmPipelines
     
     def call(input, &next_step)
       @@value = input
-      next_step.call(self.class)
+      next_step.call(input)
     end
   end
 
@@ -72,35 +96,48 @@ module EmPipelines
 
   describe Pipeline do
     let(:logger) {stub(:info => true, :debug => true)}
-    it "chains the actions using processes" do
+
+    it 'chains the actions using processes' do
       event_chain = [AddOne, SquareIt, GlobalHolder]
       pipelines = Pipeline.new(StubSpawner.new, {}, stub('monitoring'), logger)
       pipeline = pipelines.for(event_chain)
-      pipeline.notify({:data =>1})
-      GlobalHolder.held.should eql({:data => 4})
+      pipeline.notify(msg({:data =>1}))
+      
+      GlobalHolder.held[:data].should ==(4)
     end
 
-    it "does not send to the next if last returned nil" do
+    it 'does not send to the next if last returned nil' do
       event_chain = [AddOne, SquareIt, DeadEnd, GlobalHolder]
       pipelines = Pipeline.new(StubSpawner.new, {}, stub('monitoring'), logger)
       pipeline = pipelines.for(event_chain)
-      pipeline.notify({:data => 1})
+      pipeline.notify(msg({:data => 1}))
       GlobalHolder.held.should be_nil
     end
 
-    it "makes all objects in the context object available to stages" do
+    it 'makes all objects in the context object available to stages' do
       event_chain = [NeedsAnApple, NeedsAnOrange, GlobalHolder]
       pipelines = Pipeline.new(StubSpawner.new, {:apple => :some_apple, :orange => :some_orange}, stub('monitoring'), logger)
       pipeline = pipelines.for(event_chain)
-      pipeline.notify({})
-      GlobalHolder.held.should eql({:apple => :some_apple, :orange => :some_orange})
+      pipeline.notify(msg({}))
+      GlobalHolder.held[:apple].should ==(:some_apple)
+      GlobalHolder.held[:orange].should ==(:some_orange)
     end
 
-    it "sends exception to the proper handler" do
+    it 'sends exception to the proper handler' do
       monitoring = mock()
       monitoring.should_receive(:inform_exception!)
       pipeline = Pipeline.new(StubSpawner.new, {}, monitoring, logger)
-      pipeline.for([BrokenStage]).notify({})
+      pipeline.for([BrokenStage]).notify(msg({}))
+    end
+
+    it 'flags the message as consumed if goest through all stages' do
+      event_chain = [Passthrough, Passthrough]
+      pipelines = Pipeline.new(StubSpawner.new, {}, stub('monitoring'), logger)
+      pipeline = pipelines.for(event_chain)
+      a_msg = msg({:data => :whatevah})
+      a_msg.should_receive(:consumed!)
+
+      pipeline.notify(a_msg)
     end
   end
 end

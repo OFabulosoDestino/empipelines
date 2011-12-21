@@ -3,7 +3,6 @@
 ## TODO
 * Make wiring easier
 * Example apps
-* TerminatorStage should consume message
 * Control flow for AmqpEventSource
 * Transaction ID on each message
 * Evented I/O for IOEventSource

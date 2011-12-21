@@ -16,7 +16,7 @@ module TestStages
         file_name = File.join(File.dirname(__FILE__), 'events.dat')
         source = EmPipelines::IOEventSource.new(EM, file_name)
 
-        stages = [PassthroughStage, PassthroughStage, PassthroughStage, ConsumeStage]
+        stages = [PassthroughStage, PassthroughStage, PassthroughStage]
         event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), monitoring)
 
         source.on_finished do |messages|

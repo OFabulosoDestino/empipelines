@@ -1,8 +1,8 @@
 module EmPipelines
   class Pipeline
     class TerminatorStage
-      def self.notify(ignored, also_ignored = {})
-        #noop
+      def self.notify(message, ignored = {})
+        message.consumed!
       end
     end
     
