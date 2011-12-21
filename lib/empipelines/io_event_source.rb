@@ -11,9 +11,9 @@ module EmPipelines
     
     def start!
       #TODO: this sucks hard, move to evented I/O
-      events = IO.readlines(@file_path)
+      events = IO.readlines(@file_path).map { |e| e.strip }
 
-      wrapped_handler = BatchEventSource.new(@em, events)
+      wrapped_handler = BatchEventSource.new(@em, @file_path, events)
       wrapped_handler.on_event(event_handler)
       wrapped_handler.on_finished(finished_handler)
       wrapped_handler.start!

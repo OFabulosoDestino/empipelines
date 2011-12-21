@@ -4,8 +4,8 @@ module EmPipelines
   class BatchEventSource
     include EventHandlers
     
-    def initialize(em, events)
-      @em, @events = em, events
+    def initialize(em, list_name, events)
+      @em, @list_name, @events = em, list_name,events
     end
 
     def start!
@@ -18,7 +18,10 @@ module EmPipelines
       end
 
       @events.each do |e|
-        message = Message.new({:payload => e})
+        message = Message.new({
+                                :payload => e,
+                                :origin => @list_name
+                              })
 
         message.on_rejected_broken(message_finished)
         message.on_rejected(message_finished)

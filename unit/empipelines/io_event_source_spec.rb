@@ -15,7 +15,7 @@ module EmPipelines
       lambda{ IOEventSource.new(em, inexistent_file) }.should raise_error
     end
     
-    it 'sends each line in the file as payload to listeners' do
+    it 'sends each line in the file as a message to listeners' do
       source = IOEventSource.new(em, events_file)
 
       received = []
@@ -26,7 +26,9 @@ module EmPipelines
       source.start!
 
       received.map{ |i| i[:payload].to_i }.should ==([1,2,3])
+      received.each{ |i| i[:origin].should == events_file }
     end
+
     
     it 'calls the finished callback when all messages were processed' do
       source = IOEventSource.new(em, events_file)
@@ -43,7 +45,7 @@ module EmPipelines
 
       source.start!
 
-      has_finished.first.map{ |i| i[:payload].strip.to_i }.should ==([1,2,3])
+      has_finished.first.map{ |i| i[:payload].to_i }.should ==([1,2,3])
     end
     
     it 'finishes immediately if there are no events to process' do

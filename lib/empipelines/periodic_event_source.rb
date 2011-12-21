@@ -1,7 +1,10 @@
 module EmPipelines
   class PeriodicEventSource
-    def initialize(em, interval_in_secs, &event_sourcing_code)
-      @em, @interval_in_secs, @event_sourcing_code = em, interval_in_secs, event_sourcing_code
+    def initialize(em, name, interval_in_secs, &event_sourcing_code)
+      @em                  = em
+      @name                = name
+      @interval_in_secs    = interval_in_secs
+      @event_sourcing_code = event_sourcing_code 
     end
 
     def start!
@@ -18,7 +21,8 @@ module EmPipelines
 
     def tick!      
       event = @event_sourcing_code.call
-      @handler.call(event) if event
+      
+      @handler.call(Message.new(:payload => event, :origin => @name)) if event
     end
   end
 end
