@@ -33,6 +33,9 @@ module EmPipelines
 
     private
     def check_if_finished
+      #TODO: can we make this not be based on size?
+      #it makes it harder to have streams as event sources (i.e. ranges).
+      #this class should only rely on Enumerable methods.
       finished = (@finalised.size == @events.size)
 
       if finished and finished_handler

@@ -9,9 +9,9 @@ module EmPipelines
       em
     end
 
-    let (:list_name) { "list of stuff"  }
+    let (:list_name) { 'list of stuff'  }
 
-    it "sends each element on the list as a payload to the listener" do
+    it 'sends each element on the list as a payload to the listener' do
       events = [1,2,3,4,5,6,7,8,9,10]
       source = BatchEventSource.new(em, list_name, events)
 
@@ -26,7 +26,7 @@ module EmPipelines
       received.each{ |i| i[:origin].should == list_name }
     end
 
-    it "calls the batch finished callback when all items were processed" do
+    it 'calls the batch finished callback when all items were processed' do
       events = [1,2,3,4,5,6,7,8,9,10]
       source = BatchEventSource.new(em, list_name, events)
 
@@ -45,7 +45,7 @@ module EmPipelines
       has_finished.first.map{ |i| i[:payload] }.should ==(events)
     end
 
-    it "finishes immediately if there are no events to process" do
+    it 'finishes immediately if there are no events to process' do
       source = BatchEventSource.new(em, list_name, [])
 
       has_finished = []
@@ -62,12 +62,12 @@ module EmPipelines
       has_finished.first.should be_true
     end
 
-    it "only calls the finished handler if all events were processed" do
+    it 'only calls the finished handler if all events were processed' do
       events = [1,2,3,4,5,6,7,8,9,10]
       source = BatchEventSource.new(em, list_name, events)
 
       source.on_finished do |messages|
-        raise "should not be called"
+        raise 'should not be called'
       end
 
       count = 0

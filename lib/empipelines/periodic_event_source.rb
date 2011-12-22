@@ -1,5 +1,6 @@
 module EmPipelines
   class PeriodicEventSource
+    #on finish!!!!
     def initialize(em, name, interval_in_secs, &event_sourcing_code)
       @em                  = em
       @name                = name

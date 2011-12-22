@@ -3,27 +3,27 @@ module EmPipelines
     attr_reader :state
     
     def initialize(base_hash={})
-      hash!(base_hash)
+      backing_hash!(base_hash)
       created!
     end
 
     def [](key)
-      hash[key]
+      as_hash[key]
     end
 
     def []=(key, value)
       check_if_mutation_allowed
-      hash[key] = value
+      as_hash[key] = value
     end
 
     def delete(key)
       check_if_mutation_allowed
-      hash.delete key
+      as_hash.delete key
     end
 
     def merge(other_hash)
       check_if_mutation_allowed
-      Message.new(hash.merge(other_hash))
+      Message.new(as_hash.merge(other_hash))
     end
 
     def on_consumed(callback=nil, &callback_block)
@@ -56,17 +56,21 @@ module EmPipelines
       invoke(@rejected_broken_callback)
     end
 
-    def hash
+    def as_hash
       @backing_hash
+    end
+
+    def payload
+      as_hash[:payload]
     end
     
     def to_s
-      "#{self.class.name} state:#{@state} hash:#{hash}"
+      "#{self.class.name} state:#{@state} backing_hash:#{as_hash}"
     end
 
     private
 
-    def hash!(other)
+    def backing_hash!(other)
       @backing_hash = symbolised(other)
     end
     
