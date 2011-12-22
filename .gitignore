@@ -5,3 +5,4 @@ config
 .rvmrc
 .DS_Store
 vendor
+*#*
