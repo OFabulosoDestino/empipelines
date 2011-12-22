@@ -22,10 +22,9 @@ module TestStages
 
       composed_event_source = EmPipelines::AggregatedEventSource.new(EM, batch_source, file_name)
 
-      composed_event_source.on_finished do |messages|
+      composed_event_source.on_finished do |s|
         EM.stop
-        messages.should have(batch.size + num_events_on_file).items
-        messages.each { |m| m.state.should ==(:consumed) }
+        s.should ==(source)
       end
     end
   end

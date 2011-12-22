@@ -37,10 +37,12 @@ Gem::Specification.new do |s|
     Rakefile
     empipelines.gemspec
     functional/consuming_events_from_file_spec.rb
+    functional/consuming_events_from_multiple_sources_spec.rb
     functional/consuming_events_from_queue_spec.rb
     functional/events.dat
     functional/test_stages.rb
     lib/empipelines.rb
+    lib/empipelines/aggregated_event_source.rb
     lib/empipelines/amqp_event_source.rb
     lib/empipelines/batch_event_source.rb
     lib/empipelines/event_handlers.rb
@@ -50,6 +52,7 @@ Gem::Specification.new do |s|
     lib/empipelines/message.rb
     lib/empipelines/periodic_event_source.rb
     lib/empipelines/pipeline.rb
+    unit/empipelines/aggregated_event_source_spec.rb
     unit/empipelines/amqp_event_source_spec.rb
     unit/empipelines/batch_event_source_spec.rb
     unit/empipelines/empty_io_event_source.dat

@@ -5,6 +5,7 @@ module EmPipelines
     include EventHandlers
     
     def initialize(em, list_name, events)
+      @num_finalised = 0
       @em, @list_name, @events = em, list_name,events
     end
 
@@ -13,7 +14,7 @@ module EmPipelines
       check_if_finished
 
       message_finished = lambda do |m|
-        @finalised << m
+        @num_finalised += 1
         check_if_finished
       end
 
@@ -36,10 +37,10 @@ module EmPipelines
       #TODO: can we make this not be based on size?
       #it makes it harder to have streams as event sources (i.e. ranges).
       #this class should only rely on Enumerable methods.
-      finished = (@finalised.size == @events.size)
+      finished = (@num_finalised == @events.size)
 
       if finished and finished_handler
-        @em.next_tick { finished_handler.call(@finalised) }
+        @em.next_tick { finished_handler.call(self) }
       end
     end
   end

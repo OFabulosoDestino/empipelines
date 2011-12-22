@@ -33,10 +33,11 @@ module EmPipelines
     it 'calls the finished callback when all messages were processed' do
       source = IOEventSource.new(em, events_file)
 
-      has_finished = []
+      has_finished = [false]
 
-      source.on_finished do |messages|
-        has_finished << messages
+      source.on_finished do |s|
+        s.should ==(source)
+        has_finished[0] = true
       end
 
       source.on_event do |e|
@@ -45,15 +46,16 @@ module EmPipelines
 
       source.start!
 
-      has_finished.first.map{ |i| i[:payload].to_i }.should ==([1,2,3])
+      has_finished.first.should be_true
     end
     
     it 'finishes immediately if there are no events to process' do
       source = IOEventSource.new(em, empty_file)
 
-      has_finished = []
-      source.on_finished do |messages|
-        has_finished << true
+      has_finished = [false]
+      source.on_finished do |s|
+        s.should ==(source)
+        has_finished[0] = true
       end
 
       source.on_event do |e|

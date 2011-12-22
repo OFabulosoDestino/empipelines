@@ -20,11 +20,9 @@ module TestStages
         stages = [PassthroughStage, PassthroughStage, PassthroughStage]
         event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), monitoring)
 
-        source.on_finished do |messages|
+        source.on_finished do |s|
           EM.stop
-          (messages.all?{ |m| m.state == :consumed }).should be_true
-          (messages.all?{ |m| m [:origin] == batch_name }).should be_true
-          (messages.map{ |m| m[:payload] }).should ==(batch)
+          s.should ==(source)
         end
 
         event_pipeline.start!

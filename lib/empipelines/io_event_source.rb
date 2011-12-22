@@ -15,7 +15,7 @@ module EmPipelines
 
       wrapped_handler = BatchEventSource.new(@em, @file_path, events)
       wrapped_handler.on_event(event_handler)
-      wrapped_handler.on_finished(finished_handler)
+      wrapped_handler.on_finished { |*ignored| finished_handler.call(self) }
       wrapped_handler.start!
     end
   end

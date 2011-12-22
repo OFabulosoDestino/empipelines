@@ -1,6 +1,7 @@
 require 'empipelines/batch_event_source'
 
 module EmPipelines
+  ShouldNotBeCalled = lambda { raise 'should not be called' }
   describe BatchEventSource do
 
     let (:em) do
@@ -30,10 +31,11 @@ module EmPipelines
       events = [1,2,3,4,5,6,7,8,9,10]
       source = BatchEventSource.new(em, list_name, events)
 
-      has_finished = []
+      has_finished = [false]
 
-      source.on_finished do |messages|
-        has_finished << messages
+      source.on_finished do |s|
+        s.should ==(source)
+        has_finished[0] = true
       end
 
       source.on_event do |e|
@@ -42,20 +44,19 @@ module EmPipelines
 
       source.start!
 
-      has_finished.first.map{ |i| i[:payload] }.should ==(events)
+      has_finished.first.should be_true
     end
 
     it 'finishes immediately if there are no events to process' do
       source = BatchEventSource.new(em, list_name, [])
 
       has_finished = []
-      source.on_finished do |messages|
+      source.on_finished do |s|
+        s.should ==(source)
         has_finished << true
       end
 
-      source.on_event do |e|
-        raise 'should not be called!'
-      end
+      source.on_event(&ShouldNotBeCalled)
 
       source.start!
 
@@ -66,9 +67,7 @@ module EmPipelines
       events = [1,2,3,4,5,6,7,8,9,10]
       source = BatchEventSource.new(em, list_name, events)
 
-      source.on_finished do |messages|
-        raise 'should not be called'
-      end
+      source.on_event(&ShouldNotBeCalled)
 
       count = 0
       source.on_event do |e|
