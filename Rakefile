@@ -116,6 +116,7 @@ task :release => :ci do
     git tag -a #{gem_file} -m 'Version #{gem_file}'
     git push origin master
     git push origin --tags
+    gem push pkg/#{gem_file}
   END
 end
 
