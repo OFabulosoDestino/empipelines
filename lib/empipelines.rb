@@ -1,6 +1,7 @@
 module EmPipelines
   VERSION = '0.2.2'
 end
+
 require 'empipelines/message'
 
 require 'empipelines/event_handlers'
