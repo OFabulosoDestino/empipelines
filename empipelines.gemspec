@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   ## Leave these as is they will be modified for you by the rake gemspec task.
   s.name              = 'empipelines'
   s.version           = '0.2.1'
-  s.date              = '2011-12-22'
+  s.date              = '2011-12-23'
   s.rubyforge_project = 'empipelines'
 
   s.summary           = "Simple Event Handling Pipeline Architecture for EventMachine"

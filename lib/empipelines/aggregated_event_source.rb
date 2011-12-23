@@ -5,12 +5,11 @@ module EmPipelines
     include EventHandlers
     
     def initialize(em, *event_sources)
-      @em, @sources = em, event_sources
+      @em, @sources = em, event_sources.flatten
     end
 
     def start!
       finished = 0
-
       @sources.each do |s|
         s.on_event(event_handler)
         

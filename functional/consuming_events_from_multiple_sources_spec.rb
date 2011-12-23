@@ -20,11 +20,11 @@ module TestStages
       batch_name = "my batch!"
       batch_source = EmPipelines::BatchEventSource.new(EM, batch_name, batch)
 
-      composed_event_source = EmPipelines::AggregatedEventSource.new(EM, batch_source, file_name)
+      composed_event_source = EmPipelines::AggregatedEventSource.new(EM, batch_source, io_source)
 
       composed_event_source.on_finished do |s|
         EM.stop
-        s.should ==(source)
+        s.should ==(composed_event_source)
       end
     end
   end
