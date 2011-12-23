@@ -1,3 +1,4 @@
+require 'empipelines/message'
 require 'empipelines/pipeline'
 
 def msg(some_map)
