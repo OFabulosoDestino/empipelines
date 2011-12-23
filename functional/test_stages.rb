@@ -29,7 +29,7 @@ module TestStages
     include SomeStage
     
     def process(message, callback)
-      callback.call(message)
+      callback.call(message.merge!({}))
     end
   end
 

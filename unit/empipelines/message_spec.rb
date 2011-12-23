@@ -46,12 +46,10 @@ module EmPipelines
 
       it "can be merged with a map, symbolising keys" do
         original = Message.new({'a' => 1})
-        merged = original.merge({'b' => 2})
+        original.merge!({'b' => 2})
 
-        original[:b].should be_nil
-        
-        merged[:a].should ==(original[:a])
-        merged[:b].should_not be_nil
+        original[:a].should ==(1)
+        original[:b].should ==(2)
       end
     end
 

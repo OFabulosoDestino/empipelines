@@ -21,9 +21,10 @@ module EmPipelines
       as_hash.delete key
     end
 
-    def merge(other_hash)
+    def merge!(other_hash)
       check_if_mutation_allowed
-      Message.new(as_hash.merge(other_hash))
+      backing_hash!(as_hash.merge(other_hash))
+      self
     end
 
     def on_consumed(callback=nil, &callback_block)

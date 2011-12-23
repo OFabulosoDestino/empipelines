@@ -21,7 +21,7 @@ module EmPipelines
 
   class AddOne
     def call(input, &next_stage)
-      next_stage.call(input.merge({:data => (input[:data] + 1)}))
+      next_stage.call(input.merge!({:data => (input[:data] + 1)}))
     end
   end
 
@@ -33,7 +33,7 @@ module EmPipelines
 
   class SquareIt
     def call(input, &next_stage)
-      next_stage.call(input.merge({:data => (input[:data] * input[:data])}))
+      next_stage.call(input.merge!({:data => (input[:data] * input[:data])}))
     end
   end
 
@@ -51,13 +51,13 @@ module EmPipelines
 
   class NeedsAnApple
     def call(input, &next_stage)
-      next_stage.call(input.merge({:apple => apple}))
+      next_stage.call(input.merge!({:apple => apple}))
     end
   end
 
   class NeedsAnOrange
     def call(input, &next_stage)
-      next_stage.call(input.merge({:orange => orange}))
+      next_stage.call(input.merge!({:orange => orange}))
     end
   end
   
@@ -99,10 +99,13 @@ module EmPipelines
 
     it 'chains the actions using processes' do
       event_chain = [AddOne, SquareIt, GlobalHolder]
+      a_msg = msg({:data =>1})
+      a_msg.should_receive(:consumed!)
+
       pipelines = Pipeline.new(StubSpawner.new, {}, stub('monitoring'), logger)
       pipeline = pipelines.for(event_chain)
-      pipeline.notify(msg({:data =>1}))
-      
+      pipeline.notify(a_msg)
+
       GlobalHolder.held[:data].should ==(4)
     end
 
@@ -117,8 +120,12 @@ module EmPipelines
     it 'makes all objects in the context object available to stages' do
       event_chain = [NeedsAnApple, NeedsAnOrange, GlobalHolder]
       pipelines = Pipeline.new(StubSpawner.new, {:apple => :some_apple, :orange => :some_orange}, stub('monitoring'), logger)
+      a_msg = msg({})
+      a_msg.should_receive(:consumed!)
+
       pipeline = pipelines.for(event_chain)
-      pipeline.notify(msg({}))
+      pipeline.notify(a_msg)
+
       GlobalHolder.held[:apple].should ==(:some_apple)
       GlobalHolder.held[:orange].should ==(:some_orange)
     end
