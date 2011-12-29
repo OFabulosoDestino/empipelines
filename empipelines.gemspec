@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
     Gemfile.lock
     README.md
     Rakefile
+    empipelines-0.2.3.gem
     empipelines.gemspec
     functional/consuming_events_from_file_spec.rb
     functional/consuming_events_from_multiple_sources_spec.rb
@@ -45,7 +46,6 @@ Gem::Specification.new do |s|
     lib/empipelines/aggregated_event_source.rb
     lib/empipelines/amqp_event_source.rb
     lib/empipelines/batch_event_source.rb
-    lib/empipelines/event_handlers.rb
     lib/empipelines/event_pipeline.rb
     lib/empipelines/io_event_source.rb
     lib/empipelines/list_event_source.rb

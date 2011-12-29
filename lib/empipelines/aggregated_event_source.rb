@@ -1,8 +1,7 @@
-require 'empipelines/event_handlers'
+require 'empipelines/event_source'
 
 module EmPipelines
-  class AggregatedEventSource
-    include EventHandlers
+  class AggregatedEventSource <  EventSource
     
     def initialize(em, *event_sources)
       @em, @sources = em, event_sources.flatten

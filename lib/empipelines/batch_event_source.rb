@@ -1,8 +1,7 @@
-require 'empipelines/event_handlers'
+require 'empipelines/event_source'
 
 module EmPipelines
-  class BatchEventSource
-    include EventHandlers
+  class BatchEventSource < EventSource
     
     def initialize(em, list_name, events)
       @num_finalised = 0

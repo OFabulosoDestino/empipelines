@@ -4,7 +4,7 @@ end
 
 require 'empipelines/message'
 
-require 'empipelines/event_handlers'
+require 'empipelines/event_source'
 require 'empipelines/amqp_event_source'
 require 'empipelines/batch_event_source'
 require 'empipelines/io_event_source'

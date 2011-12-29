@@ -1,5 +1,5 @@
 module EmPipelines
-  module EventHandlers
+  class EventSource
     def on_event(event_handler=nil, &block)
       @event_handler = block_given? ? block : event_handler
     end
@@ -17,4 +17,4 @@ module EmPipelines
       @event_handler
     end
   end
-end    
+end

@@ -1,8 +1,7 @@
 require 'empipelines/aggregated_event_source'
 
 module EmPipelines
-  class EventSourceStub
-    include EventHandlers
+  class EventSourceStub < EventSource
 
     def event!(contents)
       raise 'not started' unless @started
