@@ -4,7 +4,6 @@
 * Make wiring easier
 * Example apps
 * Control flow for AmqpEventSource
-* Transaction ID on each message
 * Evented I/O for IOEventSource
 * Consolidate logger and monitoring
 * Default monitoring implementation

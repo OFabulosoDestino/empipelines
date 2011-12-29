@@ -2,8 +2,8 @@ require 'empipelines/message'
 
 module EmPipelines
   describe Message do
-    context "mostly behaves like a hashmap" do
-      it "stores values under symbolised keys" do
+    context 'mostly behaves like a hashmap' do
+      it 'stores values under symbolised keys' do
         original_hash = {:a => 1, :b => 2}
 
         message = Message.new(original_hash)
@@ -13,23 +13,23 @@ module EmPipelines
         message[:doesntexist].should ==(original_hash[:doesntexist])
       end
 
-      it "symbolises keys of all maps in the message" do
+      it 'symbolises keys of all maps in the message' do
         message = Message.new({
                                 :a => 1,
-                                "b" => 2,
+                                'b' => 2,
                                 3 => 3 ,
-                                "d" => {
-                                  "d1" => {"e" => 5},
-                                  "d2" => nil}
+                                'd' => {
+                                  'd1' => {'e' => 5},
+                                  'd2' => nil}
                               })
         message[:a].should ==(1)
         message[:b].should ==(2)
-        message["3".to_sym].should ==(3)
+        message['3'.to_sym].should ==(3)
         message[:d][:d1][:e].should ==(5)
         message[:d][:d2].should be_nil
       end
       
-      it "allows for values to be CRUD" do
+      it 'allows for values to be CRUD' do
         original_hash = {:a => 1, :b => 2, :c => 0}
 
         message = Message.new(original_hash)
@@ -44,7 +44,7 @@ module EmPipelines
         message[:z].should ==(999)      
       end
 
-      it "can be merged with a map, symbolising keys" do
+      it 'can be merged with a map, symbolising keys' do
         original = Message.new({'a' => 1})
         original.merge!({'b' => 2})
 
@@ -53,17 +53,17 @@ module EmPipelines
       end
     end
 
-    context "message status" do
+    context 'message status' do
 
-      let (:handler_that_should_never_be_called) { lambda { raise "This shouldnt happen"  } }
+      let (:handler_that_should_never_be_called) { lambda { raise 'This shouldnt happen'  } }
 
-      it "doesnt do anything if no state callback specified" do
+      it 'doesnt do anything if no state callback specified' do
         Message.new.consumed!
         Message.new.rejected!
         Message.new.broken!        
       end
 
-      it "is possible to reject a message if broken"do
+      it 'is possible to reject a message if broken'do
         called = []
         
         message = Message.new        
@@ -79,7 +79,7 @@ module EmPipelines
         called.should==([message])
       end
       
-      it "is possible to reject a message if consumer cant handle it" do
+      it 'is possible to reject a message if consumer cant handle it' do
         called = []
         
         message = Message.new        
@@ -95,7 +95,7 @@ module EmPipelines
         called.should==([message])
       end
 
-      it "is possible to mark a message as consumed" do
+      it 'is possible to mark a message as consumed' do
         called = []
         
         message = Message.new        
@@ -111,7 +111,7 @@ module EmPipelines
         called.should==([message])
       end
       
-      it "is not possible to change a message after marking as consumed or rejected" do
+      it 'is not possible to change a message after marking as consumed or rejected' do
         read = lambda { |m| m[:some_key] }
         mutate = lambda { |m| m[:some_key] = :some_value }
         
@@ -130,6 +130,36 @@ module EmPipelines
         lambda{ mutate.call(rejected) }.should raise_error
         lambda{ read.call(broken) }.should_not raise_error
         lambda{ mutate.call(broken) }.should raise_error
+      end
+    end
+
+    context 'generating a correlation id' do
+      it 'creates a different CoId for each sequential message' do
+        m1, m2, m3 = Message.new, Message.new, Message.new
+
+        m1.co_id.should_not ==(m2.co_id)
+        m1.co_id.should_not ==(m3.co_id)
+        m2.co_id.should_not ==(m1.co_id)
+        m2.co_id.should_not ==(m3.co_id)
+        m3.co_id.should_not ==(m2.co_id)
+        m3.co_id.should_not ==(m1.co_id)
+      end
+
+      it 'includes the process id on CoId so that multiple instances have different ids' do
+        Message.new.co_id.should match(/#{Process.pid}/)
+      end
+
+      it 'does not change CoId with state chages' do
+        m = Message.new
+        old_id = m.co_id
+
+        m.merge!({:some => :thing})
+        merged_id = m.co_id
+
+        m.consumed!
+        consumed_id = m.co_id
+
+        [merged_id, consumed_id].should ==([old_id, old_id])
       end
     end
   end

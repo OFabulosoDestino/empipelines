@@ -1,8 +1,11 @@
 module EmPipelines
   class Message
-    attr_reader :state
+    attr_reader :state, :co_id
+
+    @@count = 0
     
     def initialize(base_hash={})
+      create_correlation_id!
       backing_hash!(base_hash)
       created!
     end
@@ -70,6 +73,10 @@ module EmPipelines
     end
 
     private
+    def create_correlation_id!
+      @@count += 1
+      @co_id = "#{@@count}@#{Process.pid}"
+    end
 
     def backing_hash!(other)
       @backing_hash = symbolised(other)
