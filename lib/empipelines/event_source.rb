@@ -9,12 +9,20 @@ module EmPipelines
     end
 
     protected
+    def event_handler
+      @event_handler
+    end
+
     def finished_handler
       @finished_handler
     end
+    
+    def finished!
+      finished_handler.call(self) if finished_handler
+    end
 
-    def event_handler
-      @event_handler
+    def event!(msg)
+      event_handler.call(msg) if event_handler
     end
   end
 end

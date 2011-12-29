@@ -47,6 +47,7 @@ Gem::Specification.new do |s|
     lib/empipelines/amqp_event_source.rb
     lib/empipelines/batch_event_source.rb
     lib/empipelines/event_pipeline.rb
+    lib/empipelines/event_source.rb
     lib/empipelines/io_event_source.rb
     lib/empipelines/list_event_source.rb
     lib/empipelines/message.rb
@@ -57,6 +58,7 @@ Gem::Specification.new do |s|
     unit/empipelines/batch_event_source_spec.rb
     unit/empipelines/empty_io_event_source.dat
     unit/empipelines/event_pipeline_spec.rb
+    unit/empipelines/event_source_spec.rb
     unit/empipelines/io_event_source.dat
     unit/empipelines/io_event_source_spec.rb
     unit/empipelines/list_event_source_spec.rb

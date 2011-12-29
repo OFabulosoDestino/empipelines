@@ -1,17 +1,15 @@
 module EmPipelines
-  class ListEventSource
-    def initialize(events)
+  class ListEventSource < EventSource
+    def initialize(name, events)
+      @origin = name
       @events = events
     end
 
     def start!
       @events.each do |e|
-        @handler.call({:payload => e})
+        event!(Message.new({:origin => @origin, :payload => e}))
       end
-    end
-
-    def on_event(&handler)
-      @handler = handler
+      finished!
     end
   end
 end

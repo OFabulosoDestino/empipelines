@@ -14,7 +14,7 @@ module EmPipelines
         
         s.on_finished do |*ignored|
           finished += 1
-          finished_handler.call(self) if finished == @sources.size
+          finished! if finished == @sources.size
         end
         @em.next_tick { s.start! }
       end      

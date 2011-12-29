@@ -2,12 +2,12 @@ require 'empipelines/event_source'
 
 module EmPipelines
   class StubEventSource < EventSource
-    def something_happenend!(message)
-      event_handler.call(message)
+    def event_now!(message)
+      event!(message)
     end
 
-    def finish!
-      finished_handler.call(self)
+    def finish_now!
+      finished!
     end
   end
 
@@ -15,8 +15,6 @@ module EmPipelines
     let(:source) { StubEventSource.new }
 
     context 'defining callbacks' do
-      it 'supports blocks or procs as event handlers'
-      
       it 'supports multiple callbacks for a single event'
     end
 
@@ -25,7 +23,7 @@ module EmPipelines
         message = stub('message')
         received = []
         source.on_event { |a| received << a }
-        source.something_happenend!(message)
+        source.event_now!(message)
         received.should==([message])
       end
 
@@ -33,8 +31,13 @@ module EmPipelines
         message = stub('message')
         received = []
         source.on_finished { |a| received << a }
-        source.finish!
+        source.finish_now!
         received.should==([source])
+      end
+
+      it 'does not do anything if no callbacks' do
+        StubEventSource.new.event_now!({})
+        StubEventSource.new.finish_now!
       end
     end
 

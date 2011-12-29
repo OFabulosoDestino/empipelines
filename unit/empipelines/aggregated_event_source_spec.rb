@@ -3,14 +3,14 @@ require 'empipelines/aggregated_event_source'
 module EmPipelines
   class EventSourceStub < EventSource
 
-    def event!(contents)
+    def event_now!(contents)
       raise 'not started' unless @started
-      event_handler.call(contents) if event_handler
+      event!(contents) if event_handler
     end
 
-    def finish!
+    def finish_now!
       raise 'not started' unless @started
-      finished_handler.call([:this, :should, :not, :be, :used])
+      finished!
     end
 
     def start!
@@ -39,11 +39,11 @@ module EmPipelines
 
       aggregated.start!
 
-      source1.event! expected[0]
-      source2.event! expected[1]
-      source2.event! expected[2]
-      source3.event! expected[3]
-      source1.event! expected[4]
+      source1.event_now! expected[0]
+      source2.event_now! expected[1]
+      source2.event_now! expected[2]
+      source3.event_now! expected[3]
+      source1.event_now! expected[4]
 
       received.should ==(expected)
     end
@@ -60,9 +60,9 @@ module EmPipelines
       end
 
       aggregated.start!
-      sources[2].finish!
-      sources[1].finish!
-      sources[0].finish!
+      sources[2].finish_now!
+      sources[1].finish_now!
+      sources[0].finish_now!
 
       has_finished.first.should be_true
     end
@@ -77,8 +77,8 @@ module EmPipelines
       end
 
       aggregated.start!
-      sources[2].finish!
-      sources[0].finish!
+      sources[2].finish_now!
+      sources[0].finish_now!
     end
   end
 end
