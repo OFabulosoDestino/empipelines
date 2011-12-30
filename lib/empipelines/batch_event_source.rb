@@ -1,3 +1,4 @@
+require 'empipelines/message'
 require 'empipelines/event_source'
 
 module EmPipelines
@@ -27,7 +28,7 @@ module EmPipelines
         message.on_rejected(message_finished)
         message.on_consumed(message_finished)
 
-        event_handler.call(message)
+        event!(message)
       end
     end
 
@@ -36,11 +37,7 @@ module EmPipelines
       #TODO: can we make this not be based on size?
       #it makes it harder to have streams as event sources (i.e. ranges).
       #this class should only rely on Enumerable methods.
-      finished = (@num_finalised == @events.size)
-
-      if finished and finished_handler
-        @em.next_tick { finished_handler.call(self) }
-      end
+      finished! if (@num_finalised == @events.size)
     end
   end
 end

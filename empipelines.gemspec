@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   ## Leave these as is they will be modified for you by the rake gemspec task.
   s.name              = 'empipelines'
   s.version           = '0.2.3'
-  s.date              = '2011-12-29'
+  s.date              = '2011-12-30'
   s.rubyforge_project = 'empipelines'
 
   s.summary           = "Simple Event Handling Pipeline Architecture for EventMachine"
@@ -35,7 +35,6 @@ Gem::Specification.new do |s|
     Gemfile.lock
     README.md
     Rakefile
-    empipelines-0.2.3.gem
     empipelines.gemspec
     functional/consuming_events_from_file_spec.rb
     functional/consuming_events_from_multiple_sources_spec.rb
@@ -49,7 +48,6 @@ Gem::Specification.new do |s|
     lib/empipelines/event_pipeline.rb
     lib/empipelines/event_source.rb
     lib/empipelines/io_event_source.rb
-    lib/empipelines/list_event_source.rb
     lib/empipelines/message.rb
     lib/empipelines/periodic_event_source.rb
     lib/empipelines/pipeline.rb
@@ -61,7 +59,6 @@ Gem::Specification.new do |s|
     unit/empipelines/event_source_spec.rb
     unit/empipelines/io_event_source.dat
     unit/empipelines/io_event_source_spec.rb
-    unit/empipelines/list_event_source_spec.rb
     unit/empipelines/message_spec.rb
     unit/empipelines/periodic_event_source_spec.rb
     unit/empipelines/pipeline_spec.rb

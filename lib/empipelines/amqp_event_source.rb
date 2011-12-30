@@ -1,4 +1,5 @@
 require 'empipelines/event_source'
+require 'empipelines/message'
 
 require 'json'
 
@@ -10,10 +11,6 @@ module EmPipelines
       @em, @queue, @event_name = em, queue, event_name
     end
 
-    def on_event(&handler)
-      @handler = handler
-    end
-
     def start!
       @queue.subscribe do |header, json_payload|
         message = Message.new ({
@@ -23,7 +20,7 @@ module EmPipelines
                                  :event      => @event_name,
                                  :started_at => Time.now.to_i
                                 })
-        @handler.call(message)
+        event!(message)
       end
     end
   end

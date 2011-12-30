@@ -2,10 +2,9 @@ require 'empipelines/aggregated_event_source'
 
 module EmPipelines
   class EventSourceStub < EventSource
-
     def event_now!(contents)
       raise 'not started' unless @started
-      event!(contents) if event_handler
+      event!(contents)
     end
 
     def finish_now!

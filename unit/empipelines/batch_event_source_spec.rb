@@ -1,7 +1,7 @@
 require 'empipelines/batch_event_source'
 
 module EmPipelines
-  ShouldNotBeCalled = lambda { raise 'should not be called' }
+  ShouldNotBeCalled = lambda { |*x| raise 'should not be called' }
   describe BatchEventSource do
 
     let (:em) do
@@ -56,7 +56,7 @@ module EmPipelines
         has_finished << true
       end
 
-      source.on_event(&ShouldNotBeCalled)
+      source.on_event(ShouldNotBeCalled)
 
       source.start!
 
@@ -66,8 +66,6 @@ module EmPipelines
     it 'only calls the finished handler if all events were processed' do
       events = [1,2,3,4,5,6,7,8,9,10]
       source = BatchEventSource.new(em, list_name, events)
-
-      source.on_event(&ShouldNotBeCalled)
 
       count = 0
       source.on_event do |e|

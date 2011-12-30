@@ -1,4 +1,5 @@
 require 'empipelines/io_event_source'
+require 'empipelines/batch_event_source'
 
 module EmPipelines
   describe IOEventSource do    
