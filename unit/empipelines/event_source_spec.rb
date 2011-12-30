@@ -12,8 +12,6 @@ module EmPipelines
   end
 
   describe EventSource do
-    let(:source) { StubEventSource.new }
-
     context 'defining callbacks' do
       it 'supports multiple callbacks for a single event'do
         message1 = {:a => 1}
@@ -79,6 +77,8 @@ module EmPipelines
       it 'calls the event callback when an message is to be processed' do
         message = stub('message')
         received = []
+
+        source = StubEventSource.new
         source.on_event { |a| received << a }
         source.event_now!(message)
         received.should==([message])
@@ -87,6 +87,8 @@ module EmPipelines
       it 'calls the finished callback when all events were processed' do
         message = stub('message')
         received = []
+
+        source = StubEventSource.new
         source.on_finished { |a| received << a }
         source.finish_now!
         received.should==([source])
@@ -96,6 +98,8 @@ module EmPipelines
         StubEventSource.new.event_now!({})
         StubEventSource.new.finish_now!
       end
+
+      it 'sends a different message to each callback'
     end
 
     context 'flow control' do
