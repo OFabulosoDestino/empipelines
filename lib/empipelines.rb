@@ -8,7 +8,6 @@ require 'empipelines/event_source'
 require 'empipelines/amqp_event_source'
 require 'empipelines/batch_event_source'
 require 'empipelines/io_event_source'
-require 'empipelines/list_event_source'
 require 'empipelines/periodic_event_source'
 require 'empipelines/aggregated_event_source'
 

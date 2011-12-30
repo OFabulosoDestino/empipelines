@@ -24,7 +24,7 @@ module EmPipelines
                                 :origin => @list_name
                               })
 
-        message.on_rejected_broken(message_finished)
+        message.on_broken(message_finished)
         message.on_rejected(message_finished)
         message.on_consumed(message_finished)
 

@@ -13,13 +13,13 @@ module EmPipelines
 
     def start!
       @queue.subscribe do |header, json_payload|
-        message = Message.new ({
-                                 :header     => header,
-                                 :origin     => @queue.name,
-                                 :payload    => JSON.parse(json_payload),
-                                 :event      => @event_name,
-                                 :started_at => Time.now.to_i
-                                })
+        message = Message.new({
+                                :header     => header,
+                                :origin     => @queue.name,
+                                :payload    => JSON.parse(json_payload),
+                                :event      => @event_name,
+                                :started_at => Time.now.to_i
+                              })
         event!(message)
       end
     end

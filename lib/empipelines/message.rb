@@ -4,7 +4,8 @@ module EmPipelines
 
     @@count = 0
     
-    def initialize(base_hash={})
+    def initialize(base_hash={}, origin=nil)
+      @origin = origin
       create_correlation_id!
       backing_hash!(base_hash)
       created!
@@ -31,15 +32,15 @@ module EmPipelines
     end
 
     def on_consumed(callback=nil, &callback_block)
-      @consumed_callback = block_given? ? callback_block : callback
+      @consumed_callback = (callback || callback_block)
     end
 
     def on_rejected(callback=nil, &callback_block)
-      @rejected_callback = block_given? ? callback_block : callback
+      @rejected_callback = (callback || callback_block)
     end
     
-    def on_rejected_broken(callback=nil, &callback_block)
-      @rejected_broken_callback = block_given? ? callback_block : callback
+    def on_broken(callback=nil, &callback_block)
+      @broken_callback = (callback || callback_block)
     end
 
     def consumed!
@@ -56,8 +57,8 @@ module EmPipelines
     
     def broken!
       check_if_mutation_allowed
-      @state = :rejected_broken
-      invoke(@rejected_broken_callback)
+      @state = :broken
+      invoke(@broken_callback)
     end
 
     def as_hash
@@ -67,6 +68,14 @@ module EmPipelines
     def payload
       as_hash[:payload]
     end
+
+    def fork
+      forked = Message.new(as_hash, self)
+      forked.on_broken(@broken_callback)
+      forked.on_rejected(@rejected_callback)
+      forked.on_consumed(@consumed_callback)
+      forked
+    end
     
     def to_s
       "#{self.class.name} state:#{@state} backing_hash:#{as_hash}"
@@ -75,7 +84,8 @@ module EmPipelines
     private
     def create_correlation_id!
       @@count += 1
-      @co_id = "#{@@count}@#{Process.pid}"
+      suffix = @origin.nil? ? "@#{Process.pid}" : @origin.co_id
+      @co_id = "#{@@count}@#{suffix}"
     end
 
     def backing_hash!(other)

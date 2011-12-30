@@ -67,7 +67,7 @@ module EmPipelines
         called = []
         
         message = Message.new        
-        message.on_rejected_broken  do |msg|
+        message.on_broken  do |msg|
           called << msg
         end
         
@@ -87,7 +87,7 @@ module EmPipelines
           called << msg
         end
         
-        message.on_rejected_broken(handler_that_should_never_be_called)
+        message.on_broken(handler_that_should_never_be_called)
         message.on_consumed(handler_that_should_never_be_called)
 
         message.rejected!
@@ -103,7 +103,7 @@ module EmPipelines
           called << msg
         end
         
-        message.on_rejected_broken(handler_that_should_never_be_called)
+        message.on_broken(handler_that_should_never_be_called)
         message.on_rejected(handler_that_should_never_be_called)
 
         message.consumed!
@@ -130,6 +130,63 @@ module EmPipelines
         lambda{ mutate.call(rejected) }.should raise_error
         lambda{ read.call(broken) }.should_not raise_error
         lambda{ mutate.call(broken) }.should raise_error
+      end
+    end
+
+    context 'forking messages for different handlers' do
+      it 'forks a message with equal initial state' do
+        origin = Message.new({:a => 1})
+        fork = origin.fork
+
+        origin.as_hash.should ==(fork.as_hash)
+      end
+
+      it 'forks a message with equal handlers' do
+        origin = Message.new({:a => 1})
+
+        consumed = []
+        rejected = []
+        broken   = []
+
+        origin.on_consumed { |m| consumed << m}
+        origin.on_rejected { |m| rejected << m}
+        origin.on_broken   { |m| broken   << m}
+
+        fork1 = origin.fork
+        fork2 = origin.fork
+
+        origin.consumed!
+        fork1.broken!
+        fork2.rejected!
+
+        consumed.should ==([origin])
+        rejected.should ==([fork2])
+        broken.should   ==([fork1])
+      end
+
+      it 'makes the messages contents independent' do
+        origin = Message.new({:a => 1})
+        fork = origin.fork
+        origin[:b] = 2
+        fork[:c] = 3
+
+        origin[:c].should be_nil
+        fork[:c].should_not be_nil
+
+        origin[:b].should_not be_nil
+        fork[:b].should be_nil
+      end
+
+      it 'makes the messages state independent' do
+        origin = Message.new({:a => 1})
+        fork = origin.fork
+
+
+        origin.broken!
+        fork.consumed!
+
+        origin.state.should ==(:broken)
+        fork.state.should ==(:consumed)
       end
     end
 
@@ -160,6 +217,19 @@ module EmPipelines
         consumed_id = m.co_id
 
         [merged_id, consumed_id].should ==([old_id, old_id])
+      end
+
+      it 'a forked message has a different, yet related, CoId from its origin' do
+        origin = Message.new
+        forked = origin.fork
+        grandforked = forked.fork
+
+        origin.co_id.should_not ==(forked.co_id)
+        origin.co_id.should_not ==(grandforked.co_id)
+        forked.co_id.should_not ==(grandforked.co_id)
+
+        forked.co_id.should match(/#{origin.co_id}/)
+        grandforked.co_id.should match(/#{forked.co_id}/)
       end
     end
   end
