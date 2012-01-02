@@ -3,7 +3,7 @@ module EmPipelines
     attr_reader :state, :co_id
 
     @@count = 0
-    
+
     def initialize(base_hash={}, origin=nil)
       @origin = origin
       create_correlation_id!
@@ -38,7 +38,7 @@ module EmPipelines
     def on_rejected(callback=nil, &callback_block)
       @rejected_callback = (callback || callback_block)
     end
-    
+
     def on_broken(callback=nil, &callback_block)
       @broken_callback = (callback || callback_block)
     end
@@ -54,11 +54,15 @@ module EmPipelines
       @state = :rejected
       invoke(@rejected_callback)
     end
-    
+
     def broken!
       check_if_mutation_allowed
       @state = :broken
       invoke(@broken_callback)
+    end
+
+    def processed?
+      @state != :created
     end
 
     def as_hash
@@ -69,16 +73,16 @@ module EmPipelines
       as_hash[:payload]
     end
 
-    def fork
+    def copy
       forked = Message.new(as_hash, self)
       forked.on_broken(@broken_callback)
       forked.on_rejected(@rejected_callback)
       forked.on_consumed(@consumed_callback)
       forked
     end
-    
+
     def to_s
-      "#{self.class.name} state:#{@state} backing_hash:#{as_hash}"
+      "#{self.class.name} co_id:#{co_id} state:#{@state} backing_hash:#{as_hash}"
     end
 
     private
@@ -91,10 +95,10 @@ module EmPipelines
     def backing_hash!(other)
       @backing_hash = symbolised(other)
     end
-    
+
     def symbolised(raw_hash)
       raw_hash.reduce({}) do |acc, (key, value)|
-        acc[key.to_s.to_sym] = value.is_a?(Hash) ? symbolised(value) : value        
+        acc[key.to_s.to_sym] = value.is_a?(Hash) ? symbolised(value) : value
         acc
       end
     end
@@ -102,11 +106,11 @@ module EmPipelines
     def created!
       @state = :created
     end
-    
+
     def check_if_mutation_allowed
-      raise "Cannot mutate #{self}" unless @state == :created
+      raise "Cannot mutate #{self}" if processed?
     end
-    
+
     def invoke(callback)
       callback.call(self) if callback
     end

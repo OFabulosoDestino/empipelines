@@ -28,7 +28,7 @@ module EmPipelines
         message[:d][:d1][:e].should ==(5)
         message[:d][:d2].should be_nil
       end
-      
+
       it 'allows for values to be CRUD' do
         original_hash = {:a => 1, :b => 2, :c => 0}
 
@@ -41,7 +41,7 @@ module EmPipelines
         message[:a].should ==(666)
         message[:b].should be_nil
         message[:c].should ==(original_hash[:c])
-        message[:z].should ==(999)      
+        message[:z].should ==(999)
       end
 
       it 'can be merged with a map, symbolising keys' do
@@ -53,74 +53,94 @@ module EmPipelines
       end
     end
 
-    context 'message status' do
+    context 'message status handlers' do
 
       let (:handler_that_should_never_be_called) { lambda { raise 'This shouldnt happen'  } }
 
       it 'doesnt do anything if no state callback specified' do
         Message.new.consumed!
         Message.new.rejected!
-        Message.new.broken!        
+        Message.new.broken!
+      end
+
+      it 'is possible to override a handler' do
+        origin = Message.new
+        origin.on_broken(handler_that_should_never_be_called)
+        origin.on_rejected(handler_that_should_never_be_called)
+        origin.on_consumed(handler_that_should_never_be_called)
+
+        consume = origin.copy
+        consume.on_consumed {}
+
+        reject  = origin.copy
+        reject.on_rejected {}
+
+        broken  = origin.copy
+        broken.on_broken {}
+
+        consume.consumed!
+        broken.broken!
+        reject.rejected!
       end
 
       it 'is possible to reject a message if broken'do
         called = []
-        
-        message = Message.new        
+
+        message = Message.new
         message.on_broken  do |msg|
           called << msg
         end
-        
-        message.on_rejected(handler_that_should_never_be_called) 
+
+        message.on_rejected(handler_that_should_never_be_called)
         message.on_consumed(handler_that_should_never_be_called)
 
         message.broken!
-        
+
         called.should==([message])
       end
-      
+
       it 'is possible to reject a message if consumer cant handle it' do
         called = []
-        
-        message = Message.new        
+
+        message = Message.new
         message.on_rejected  do |msg|
           called << msg
         end
-        
+
         message.on_broken(handler_that_should_never_be_called)
         message.on_consumed(handler_that_should_never_be_called)
 
         message.rejected!
-        
+
         called.should==([message])
       end
 
       it 'is possible to mark a message as consumed' do
         called = []
-        
-        message = Message.new        
+
+        message = Message.new
         message.on_consumed do |msg|
           called << msg
         end
-        
+
         message.on_broken(handler_that_should_never_be_called)
         message.on_rejected(handler_that_should_never_be_called)
 
         message.consumed!
-        
+
         called.should==([message])
       end
-      
+
       it 'is not possible to change a message after marking as consumed or rejected' do
         read = lambda { |m| m[:some_key] }
         mutate = lambda { |m| m[:some_key] = :some_value }
-        
+
         consumed = Message.new
         consumed.consumed!
-        
+
         rejected = Message.new
         rejected.rejected!
-        
+
         broken = Message.new
         broken.broken!
 
@@ -133,15 +153,15 @@ module EmPipelines
       end
     end
 
-    context 'forking messages for different handlers' do
-      it 'forks a message with equal initial state' do
+    context 'cloning messages' do
+      it 'copys a message with equal initial state' do
         origin = Message.new({:a => 1})
-        fork = origin.fork
+        copy = origin.copy
 
-        origin.as_hash.should ==(fork.as_hash)
+        origin.as_hash.should ==(copy.as_hash)
       end
 
-      it 'forks a message with equal handlers' do
+      it 'copys a message with equal handlers' do
         origin = Message.new({:a => 1})
 
         consumed = []
@@ -152,41 +172,40 @@ module EmPipelines
         origin.on_rejected { |m| rejected << m}
         origin.on_broken   { |m| broken   << m}
 
-        fork1 = origin.fork
-        fork2 = origin.fork
+        copy1 = origin.copy
+        copy2 = origin.copy
 
         origin.consumed!
-        fork1.broken!
-        fork2.rejected!
+        copy1.broken!
+        copy2.rejected!
 
         consumed.should ==([origin])
-        rejected.should ==([fork2])
-        broken.should   ==([fork1])
+        rejected.should ==([copy2])
+        broken.should   ==([copy1])
       end
 
       it 'makes the messages contents independent' do
         origin = Message.new({:a => 1})
-        fork = origin.fork
+        copy = origin.copy
         origin[:b] = 2
-        fork[:c] = 3
+        copy[:c] = 3
 
         origin[:c].should be_nil
-        fork[:c].should_not be_nil
+        copy[:c].should_not be_nil
 
         origin[:b].should_not be_nil
-        fork[:b].should be_nil
+        copy[:b].should be_nil
       end
 
       it 'makes the messages state independent' do
         origin = Message.new({:a => 1})
-        fork = origin.fork
-
+        copy = origin.copy
 
         origin.broken!
-        fork.consumed!
+        copy.consumed!
 
         origin.state.should ==(:broken)
-        fork.state.should ==(:consumed)
+        copy.state.should ==(:consumed)
       end
     end
 
@@ -219,17 +238,17 @@ module EmPipelines
         [merged_id, consumed_id].should ==([old_id, old_id])
       end
 
-      it 'a forked message has a different, yet related, CoId from its origin' do
+      it 'a copied message has a different, yet related, CoId from its origin' do
         origin = Message.new
-        forked = origin.fork
-        grandforked = forked.fork
+        copied = origin.copy
+        grandcopied = copied.copy
 
-        origin.co_id.should_not ==(forked.co_id)
-        origin.co_id.should_not ==(grandforked.co_id)
-        forked.co_id.should_not ==(grandforked.co_id)
+        origin.co_id.should_not ==(copied.co_id)
+        origin.co_id.should_not ==(grandcopied.co_id)
+        copied.co_id.should_not ==(grandcopied.co_id)
 
-        forked.co_id.should match(/#{origin.co_id}/)
-        grandforked.co_id.should match(/#{forked.co_id}/)
+        copied.co_id.should match(/#{origin.co_id}/)
+        grandcopied.co_id.should match(/#{copied.co_id}/)
       end
     end
   end
