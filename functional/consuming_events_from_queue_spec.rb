@@ -4,14 +4,13 @@ require File.join(File.dirname(__FILE__), 'test_stages')
 
 module TestStages
   describe 'Consumption of events from a queue' do
-    let(:monitoring) { stub() }
-    let(:logger) { stub(:info => nil, :debug => nil) }
+    let(:monitoring) { stub(:inform => nil, :debug => nil) }
     let (:processed) { {} }
     include EmRunner
 
     it 'consumes all events from the a queue' do
       with_em_run do
-        pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring, logger)
+        pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring)
 
         batch = (1...1000).to_a
         batch_name = "my batch!"

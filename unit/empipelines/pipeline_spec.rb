@@ -96,14 +96,14 @@ module EmPipelines
   end
 
   describe Pipeline do
-    let(:logger) {stub(:info => true, :debug => true)}
+    let(:monitoring) { stub(:inform => nil, :debug => nil) }
 
     it 'chains the actions using processes' do
       event_chain = [AddOne, SquareIt, GlobalHolder]
       a_msg = msg({:data =>1})
       a_msg.should_receive(:consumed!)
 
-      pipelines = Pipeline.new(StubSpawner.new, {}, stub('monitoring'), logger)
+      pipelines = Pipeline.new(StubSpawner.new, {}, monitoring)
       pipeline = pipelines.for(event_chain)
       pipeline.notify(a_msg)
 
@@ -112,7 +112,7 @@ module EmPipelines
 
     it 'does not send to the next if last returned nil' do
       event_chain = [AddOne, SquareIt, DeadEnd, GlobalHolder]
-      pipelines = Pipeline.new(StubSpawner.new, {}, stub('monitoring'), logger)
+      pipelines = Pipeline.new(StubSpawner.new, {}, monitoring)
       pipeline = pipelines.for(event_chain)
       pipeline.notify(msg({:data => 1}))
       GlobalHolder.held.should be_nil
@@ -120,7 +120,7 @@ module EmPipelines
 
     it 'makes all objects in the context object available to stages' do
       event_chain = [NeedsAnApple, NeedsAnOrange, GlobalHolder]
-      pipelines = Pipeline.new(StubSpawner.new, {:apple => :some_apple, :orange => :some_orange}, stub('monitoring'), logger)
+      pipelines = Pipeline.new(StubSpawner.new, {:apple => :some_apple, :orange => :some_orange}, monitoring)
       a_msg = msg({})
       a_msg.should_receive(:consumed!)
 
@@ -132,15 +132,14 @@ module EmPipelines
     end
 
     it 'sends exception to the proper handler' do
-      monitoring = mock()
       monitoring.should_receive(:inform_exception!)
-      pipeline = Pipeline.new(StubSpawner.new, {}, monitoring, logger)
+      pipeline = Pipeline.new(StubSpawner.new, {}, monitoring)
       pipeline.for([BrokenStage]).notify(msg({}))
     end
 
     it 'flags the message as consumed if goest through all stages' do
       event_chain = [Passthrough, Passthrough]
-      pipelines = Pipeline.new(StubSpawner.new, {}, stub('monitoring'), logger)
+      pipelines = Pipeline.new(StubSpawner.new, {}, monitoring)
       pipeline = pipelines.for(event_chain)
       a_msg = msg({:data => :whatevah})
       a_msg.should_receive(:consumed!)

@@ -6,9 +6,8 @@ module EmPipelines
       end
     end
     
-    def initialize(em, context, monitoring, logger)
+    def initialize(em, context, monitoring)
       @em = em
-      @logger = logger
       @context = context
       @monitoring = monitoring
     end
@@ -17,12 +16,11 @@ module EmPipelines
       stages = event_definition.map(&instantiate_with_dependencies)
 
       monitoring = @monitoring
-      logger = @logger
       
       first_stage_process = stages.reverse.reduce(TerminatorStage) do |current_head, next_stage|
         @em.spawn do |input|
           begin
-            logger.debug "#{next_stage.class}#notify with #{input}}"
+            monitoring.debug "#{next_stage.class}#notify with #{input}}"
             next_stage.call(input) do |output|
               current_head.notify(output)
             end
@@ -32,7 +30,7 @@ module EmPipelines
         end        
       end
       
-      @logger.info "Pipeline for event_definition is: #{stages.map(&:class).join('->')}"    
+      @monitoring.inform "Pipeline for event_definition is: #{stages.map(&:class).join('->')}"    
       first_stage_process
     end
     
