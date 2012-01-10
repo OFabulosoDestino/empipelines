@@ -1,11 +1,22 @@
-# EM Pipelines
+# EmPipelines
+
+## Message States
+
+* **Consumed:** The message went through all relevant stages and was
+fully consumed.
+* **Broken:** The message *left the EventSource* in an invalid
+state and should not be processed. If the message was corrupted by a
+previous stage it should not be broken, just rejected.
+* **Rejected:** The message is correct but this pipeline instance
+cannot process it, probably due to some temporary problem.
 
 ## TODO
 * Make wiring easier
 * Example apps
-* Control flow for AmqpEventSource
 * Evented I/O for IOEventSource
 * Consolidate logger and monitoring
 * Default monitoring implementation
 * Performance testing
 * Detect insonsistency when handler didnt consume or pass message ahead
+* Is callback in the stage's signature redundant? Could we just return
+the message?

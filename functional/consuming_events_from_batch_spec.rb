@@ -3,9 +3,9 @@ require 'empipelines'
 require File.join(File.dirname(__FILE__), 'test_stages')
 
 module TestStages
-  describe 'Consumption of events from a queue' do
+  describe 'Consumption of events from a in-memory batch' do
     let(:monitoring) { stub(:inform => nil, :debug => nil) }
-    let (:processed) { {} }
+    let (:processed) { [] }
     include EmRunner
 
     it 'consumes all events from the a queue' do

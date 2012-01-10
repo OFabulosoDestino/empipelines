@@ -5,7 +5,7 @@ require File.join(File.dirname(__FILE__), 'test_stages')
 module TestStages
   describe 'Consumption of events from multiple sources' do
     let(:monitoring) { stub(:inform => nil, :debug => nil) }
-    let (:processed) { {} }
+    let (:processed) { [] }
     include EmRunner
 
     it 'consumes all events from all sources' do

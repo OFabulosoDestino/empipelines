@@ -20,7 +20,7 @@ module TestStages
     end
     
     def call(message, &callback)
-      processed[self.class] = message
+      processed << [@id, message.co_id]
       process(message, callback)
     end          
   end

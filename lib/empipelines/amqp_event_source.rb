@@ -12,14 +12,16 @@ module EmPipelines
     end
 
     def start!
-      @queue.subscribe do |header, json_payload|
+      @queue.subscribe(:ack => true) do |header, json_payload|
         message = Message.new({
-                                :header     => header,
                                 :origin     => @queue.name,
                                 :payload    => JSON.parse(json_payload),
                                 :event      => @event_name,
                                 :started_at => Time.now.to_i
                               })
+        message.on_consumed { |m| header.ack }
+        message.on_broken   { |m| header.reject(:requeue => true) }
+        message.on_rejected { |m| header.reject(:requeue => true) }
         event!(message)
       end
     end
