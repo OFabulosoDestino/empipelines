@@ -14,6 +14,7 @@ module EmPipelines
 
   describe AmqpEventSource do
     let (:em) { mock('eventmachine') }
+    let (:monitoring) { mock('monitoring') }
 
     it 'wraps each AMQP message and send to listeners' do
       json_payload = '{"key":"value"}'
@@ -24,7 +25,7 @@ module EmPipelines
 
       received_messages = []
 
-      amqp_source = AmqpEventSource.new(em, queue, event_type)
+      amqp_source = AmqpEventSource.new(em, queue, event_type, monitoring)
       amqp_source.on_event { |e| received_messages << e }
       amqp_source.start!
 
@@ -43,20 +44,34 @@ module EmPipelines
 
       header.should_receive(:ack)
 
-      amqp_source = AmqpEventSource.new(em, queue, 'event type')
+      amqp_source = AmqpEventSource.new(em, queue, 'event type', monitoring)
       amqp_source.on_event { |e| e.consumed! }
       amqp_source.start!
 
       queue.publish(header, '{"key":"value"}')
     end
 
-    it 'rejects  broken messages with no requeue' do
+    it 'marks message as broken if cannot be parsed' do
       queue = StubQueue.new
       header = mock('header')
 
-      header.should_receive(:reject)
+      header.should_receive(:reject).with({:requeue => false})
+      monitoring.should_receive(:inform_exception!)
 
-      amqp_source = AmqpEventSource.new(em, queue, 'event type')
+      amqp_source = AmqpEventSource.new(em, queue, 'event type', monitoring)
+      amqp_source.on_event { raise 'should never happen' }
+      amqp_source.start!
+  
+      queue.publish(header, 'some junk')
+    end
+    
+    it 'rejects broken messages with no requeue' do
+      queue = StubQueue.new
+      header = mock('header')
+
+      header.should_receive(:reject).with({:requeue => false})
+
+      amqp_source = AmqpEventSource.new(em, queue, 'event type', monitoring)
       amqp_source.on_event { |e| e.broken! }
       amqp_source.start!
 
@@ -69,7 +84,7 @@ module EmPipelines
 
       header.should_receive(:reject).with({:requeue => true})
 
-      amqp_source = AmqpEventSource.new(em, queue, 'event type')
+      amqp_source = AmqpEventSource.new(em, queue, 'event type', monitoring)
       amqp_source.on_event { |e| e.rejected! }
       amqp_source.start!
 
