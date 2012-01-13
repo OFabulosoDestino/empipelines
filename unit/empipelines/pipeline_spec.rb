@@ -10,7 +10,7 @@ module EmPipelines
     def consumed!
       raise 'unexpected call'
     end
-    
+
     def rejected!
       raise 'unexpected call'
     end
@@ -61,7 +61,7 @@ module EmPipelines
       next_stage.call(input.merge!({:orange => orange}))
     end
   end
-  
+
   class GlobalHolder
     @@value = nil
     def GlobalHolder.held
@@ -71,7 +71,7 @@ module EmPipelines
     def initialize
       @@value = nil
     end
-    
+
     def call(input, &next_step)
       @@value = input
       next_step.call(input)
@@ -79,17 +79,17 @@ module EmPipelines
   end
 
   class StubSpawner
-    
+
     class StubProcess
       def initialize(block)
         @block = block
       end
-      
+
       def notify(input)
         @block.call(input)
       end
     end
-    
+
     def spawn(&block)
       StubProcess.new(block)
     end
@@ -131,10 +131,14 @@ module EmPipelines
       GlobalHolder.held[:orange].should ==(:some_orange)
     end
 
-    it 'sends exception to the proper handler' do
+    it 'marks message as broken if uncaught exception' do
+      a_msg = msg({})
       monitoring.should_receive(:inform_exception!)
+
+      a_msg.should_receive(:broken!)
+
       pipeline = Pipeline.new(StubSpawner.new, {}, monitoring)
-      pipeline.for([BrokenStage]).notify(msg({}))
+      pipeline.for([BrokenStage]).notify(a_msg)
     end
 
     it 'flags the message as consumed if goest through all stages' do
