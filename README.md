@@ -1,4 +1,5 @@
 # EmPipelines
+[![Build Status](https://secure.travis-ci.org/pcalcado/empipelines.png)](http://travis-ci.org/pcalcado/empipelines)
 
 ## Message States
 
