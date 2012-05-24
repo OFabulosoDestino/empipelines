@@ -12,8 +12,8 @@ Gem::Specification.new do |s|
   s.description       = "Simple Event Handling Pipeline Architecture for EventMachine"
 
   s.authors           = ["Tobias Schmidt", "Phil Calcado"]
-  s.email             = 'pcalcado+empipelines@gmail.com'
-  s.homepage          = 'http://github.com/pcalcado/empipelines'
+  s.email             = 'phil+empipelines@gmail.com'
+  s.homepage          = 'http://github.com/soundcloud/empipelines'
 
   s.require_paths = %w[lib]
   #s.executables = ["empipelines"]
