@@ -4,6 +4,8 @@ end
 
 require 'empipelines/message'
 
+require 'empipelines/message_validity'
+
 require 'empipelines/event_source'
 require 'empipelines/amqp_event_source'
 require 'empipelines/batch_event_source'
