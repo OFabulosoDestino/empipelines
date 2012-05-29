@@ -26,8 +26,8 @@ module EmPipelines::MessageValidity
     end
 
     def eql?(other)
-      # TODO: maintain Set properties
-      # without overriding #eql? and #hash
+      # TODO: shouldn't we be able to have Set properties
+      # without overriding `#eql?` and `#hash`?
       self.class.name == other.class.name &&
       self.keys == other.keys &&
       self.in == other.in
