@@ -75,11 +75,6 @@ module EmPipelines
           end
         end
 
-        context "#keys" do
-          it "picks out all "
-
-        end
-
         context "#in (aka top_level_key)" do
           it "defaults to nil" do
             define_validation(test_class, -> { validates_presence_of_keys :a })
