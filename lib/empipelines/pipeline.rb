@@ -24,6 +24,7 @@ module EmPipelines
             next_stage.call(input_message) do |output|
               current_head.notify(output)
             end
+          # TODO: Really? Rescue _all_ the exceptions?
           rescue => exception
             monitoring.inform_exception!(exception, next_stage, "Message #{input_message} is broken")
             input_message.broken!

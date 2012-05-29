@@ -9,7 +9,7 @@ module TestStages
     include EmRunner
 
     it 'consumes all events from the file' do
-      with_em_run do
+      with_em_timeout(10) do
         pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring)
 
         file_name = File.join(File.dirname(__FILE__), 'events.dat')
@@ -19,9 +19,9 @@ module TestStages
         event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), monitoring)
 
         source.on_finished do |s|
-          EM.stop          
+          EM.stop
         end
-        
+
         event_pipeline.start!
       end
     end

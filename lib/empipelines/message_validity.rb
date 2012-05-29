@@ -33,6 +33,7 @@ module EmPipelines::MessageValidity
     end
 
     def validate!(message)
+      # puts "MessageValidity.validate!"
       self.validations.all? do |validation|
         proc          = validation.proc
         keys          = validation.keys

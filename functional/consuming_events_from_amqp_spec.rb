@@ -28,7 +28,7 @@ module TestStages
     include EmRunner
 
     it 'consumes all events from a queue' do
-      with_em_run do
+      with_em_timeout(10) do
         exchange, queue = setup_queues
 
         messages = (1..1000).map { |i| {:data => i}.to_json }
@@ -51,7 +51,7 @@ module TestStages
     end
 
     it 'discards broken messages' do
-            with_em_run do
+            with_em_timeout(10) do
         exchange, queue = setup_queues
 
         messages = (1..1000).map { |i| {:data => i}.to_json }
@@ -74,7 +74,7 @@ module TestStages
     end
 
     it 'retries messages if told to do so' do
-      with_em_run do
+      with_em_timeout(10) do
         exchange, queue = setup_queues
 
         messages = [ {:data => "b"}.to_json ]

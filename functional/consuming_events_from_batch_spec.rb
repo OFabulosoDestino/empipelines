@@ -9,7 +9,7 @@ module TestStages
     include EmRunner
 
     it 'consumes all events from the a queue' do
-      with_em_run do
+      with_em_timeout(10) do
         pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring)
 
         batch = (1...1000).to_a
