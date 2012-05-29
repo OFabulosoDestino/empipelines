@@ -1,7 +1,7 @@
 require "empipelines/message_validity/key_validation"
 
-module MessageValidity
-  class NumericalityValidation < KeyValidation
+module EmPipelines::MessageValidity
+  class Numericality < KeyValidation
     def self.proc
       ->(x) { x.respond_to?(:to_int) }
     end

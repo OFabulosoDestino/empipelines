@@ -1,7 +1,7 @@
 require "empipelines/message_validity/key_validation"
 
-module MessageValidity
-  class TemporalityValidation < KeyValidation
+module EmPipelines::MessageValidity
+  class Temporality < KeyValidation
     def self.proc
       ->(x) do
         begin

@@ -1,6 +1,6 @@
 require "empipelines/message_validity/key_validation"
 
-module MessageValidity
+module EmPipelines::MessageValidity
   class Presence < KeyValidation
     def self.proc
       ->(x) { x.present? }

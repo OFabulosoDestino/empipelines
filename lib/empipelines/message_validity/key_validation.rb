@@ -1,8 +1,4 @@
-require "empipelines/message_validity/key_validations/presence"
-require "empipelines/message_validity/key_validations/temporality"
-require "empipelines/message_validity/key_validations/numericality"
-
-module MessageValidation
+module EmPipelines::MessageValidity
   class KeyValidation
     attr_accessor :keys, :error_text, :in, :proc
 
