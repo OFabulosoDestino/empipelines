@@ -5,8 +5,6 @@ module EmPipelines::MessageValidity
     def self.proc
       ->(x) do
         begin
-          # TODO: determine if x is "parseable"
-          # without relying on exceptions to modify control flow
           !!Time.parse(x)
         rescue ArgumentError, TypeError
           false

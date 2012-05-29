@@ -3,7 +3,13 @@ require "empipelines/message_validity/key_validation"
 module EmPipelines::MessageValidity
   class Numericality < KeyValidation
     def self.proc
-      ->(x) { x.respond_to?(:to_int) }
+      ->(x) do
+        begin
+          !!Float(x)
+        rescue ArgumentError, TypeError
+          false
+        end
+      end
     end
 
     def self.error_text

@@ -1,5 +1,5 @@
-require 'empipelines/message'
-require 'empipelines/message_validity'
+require "empipelines/message"
+require "empipelines/message_validity"
 
 module EmPipelines
   describe MessageValidity do
@@ -65,6 +65,22 @@ module EmPipelines
         end
       end
 
+      context "error handling" do
+        it "fails loud & hard if there are no key arguments" do
+          expect do
+            define_validation(test_class, -> { validates_presence_of_keys })
+          end.to raise_error
+        end
+      end
+
+      context "default argument values" do
+        it "defaults to " do
+          expect do
+            define_validation(test_class, -> { validates_presence_of_keys })
+          end.to raise_error
+        end
+      end
+
       context "@validations" do
         it "begins empty" do
           test_class.validations.size.should == 0
@@ -95,8 +111,8 @@ module EmPipelines
     context "#validate!" do
       context "with two presence requirements" do
         before do
-          define_validation(test_class, -> { validates_presence_of_keys :a })
-          define_validation(test_class, -> { validates_presence_of_keys :a, :b })
+          define_validation(test_class, -> { validates_presence_of_keys :a, :in => :payload })
+          define_validation(test_class, -> { validates_presence_of_keys :a, :b, :in => :payload })
         end
 
         let(:valid_message) do
@@ -127,7 +143,7 @@ module EmPipelines
             test_class.validate!(message).should be_true
           end
 
-          it "doesn't raise an error" do
+          it "raises no errors" do
             expect do
               test_class.validate!(message)
             end.to_not raise_error

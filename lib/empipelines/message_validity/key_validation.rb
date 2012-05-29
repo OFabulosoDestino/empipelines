@@ -20,7 +20,7 @@ module EmPipelines::MessageValidity
       raise ImplementInSubclassError.new
     end
 
-    def initialize(keys, top_level_key=:payload)
+    def initialize(keys, top_level_key=nil)
       self.in = top_level_key
       self.keys = keys
     end
