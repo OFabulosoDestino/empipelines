@@ -158,7 +158,7 @@ module EmPipelines
         origin = Message.new({:a => 1})
         copy = origin.copy
 
-        origin.as_hash.should ==(copy.as_hash)
+        origin.to_hash.should ==(copy.to_hash)
       end
 
       it 'copies a message with equal handlers' do

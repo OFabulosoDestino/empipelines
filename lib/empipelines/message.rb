@@ -12,22 +12,22 @@ module EmPipelines
     end
 
     def [](key)
-      as_hash[key]
+      to_hash[key]
     end
 
     def []=(key, value)
       check_if_mutation_allowed
-      as_hash[key] = value
+      to_hash[key] = value
     end
 
     def delete(key)
       check_if_mutation_allowed
-      as_hash.delete key
+      to_hash.delete key
     end
 
     def merge!(other_hash)
       check_if_mutation_allowed
-      backing_hash!(as_hash.merge(other_hash))
+      backing_hash!(to_hash.merge(other_hash))
       self
     end
 
@@ -65,16 +65,16 @@ module EmPipelines
       @state != :created
     end
 
-    def as_hash
+    def to_hash
       @backing_hash
     end
 
     def payload
-      as_hash[:payload]
+      to_hash[:payload]
     end
 
     def copy
-      forked = Message.new(as_hash, self)
+      forked = Message.new(to_hash, self)
       forked.on_broken(@broken_callback)
       forked.on_rejected(@rejected_callback)
       forked.on_consumed(@consumed_callback)
@@ -82,7 +82,7 @@ module EmPipelines
     end
 
     def to_s
-      "#{self.class.name} co_id:#{co_id} state:#{@state} backing_hash:#{as_hash}"
+      "#{self.class.name} co_id:#{co_id} state:#{@state} backing_hash:#{to_hash}"
     end
 
     private

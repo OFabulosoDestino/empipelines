@@ -1,5 +1,6 @@
 require "empipelines/message"
 require "empipelines/message_validity"
+require "empipelines/message_validity/key_validations/presence"
 
 module EmPipelines
   describe MessageValidity do
@@ -65,19 +66,38 @@ module EmPipelines
         end
       end
 
-      context "error handling" do
-        it "fails loud & hard if there are no key arguments" do
-          expect do
-            define_validation(test_class, -> { validates_presence_of_keys })
-          end.to raise_error
+      context "argument parsing" do
+        context "error handling" do
+          it "fails loud & hard if there are no key arguments" do
+            expect do
+              define_validation(test_class, -> { validates_presence_of_keys })
+            end.to raise_error(ArgumentError)
+          end
         end
-      end
 
-      context "default argument values" do
-        it "defaults to " do
-          expect do
-            define_validation(test_class, -> { validates_presence_of_keys })
-          end.to raise_error
+        context "#keys" do
+          it "picks out all "
+
+        end
+
+        context "#in (aka top_level_key)" do
+          it "defaults to nil" do
+            define_validation(test_class, -> { validates_presence_of_keys :a })
+
+            test_class.validations.should include(EmPipelines::MessageValidity::Presence.new([:a], nil))
+          end
+
+          it "allows overrides" do
+            define_validation(test_class, -> { validates_presence_of_keys :a, :in => :payload })
+
+            test_class.validations.should include(EmPipelines::MessageValidity::Presence.new([:a], :payload))
+          end
+
+          it "shouldnt fall over if, for whatever reason, nil is specified explicitly" do
+            define_validation(test_class, -> { validates_presence_of_keys :a, :in => nil })
+
+            test_class.validations.should include(EmPipelines::MessageValidity::Presence.new([:a], nil))
+          end
         end
       end
 

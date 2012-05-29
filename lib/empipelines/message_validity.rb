@@ -19,8 +19,14 @@ module EmPipelines::MessageValidity
   module ClassMethods
     [ Presence, Numericality, Temporality ].each do |validation|
       send(:define_method, validation.declaration) do |*args|
-        top_level_key = args.delete(:in).try(:to_sym)
-        keys = args.flatten.uniq.compact
+        top_level_key =
+          if (in_hash = args.last).is_a?(Hash)
+            args.delete(in_hash)[:in].try(:to_sym)
+          else
+            nil
+          end
+
+        keys = args.uniq.compact
         raise ArgumentError.new("no keys specified for validation") if keys.blank?
         validations.add validation.new(*[keys, top_level_key].compact)
       end
@@ -36,7 +42,7 @@ module EmPipelines::MessageValidity
         target_hash.values_at(*keys).all?(&proc).tap do |result|
           monitoring.inform_error! "payload validation failed: #{error_text}" unless result
         end
-      end || message.broken!
+      end || false.tap { message.broken! }
     end
   end
 end
