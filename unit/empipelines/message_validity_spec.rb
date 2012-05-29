@@ -22,7 +22,7 @@ module EmPipelines
     end
 
     def inject_module_into(klass)
-      "include #{described_class}".tap { |s| klass.class_eval(s) }
+      klass.send(:include, described_class)
     end
 
     def define_validation(klass, proc)
