@@ -154,14 +154,14 @@ module EmPipelines
     end
 
     context 'cloning messages' do
-      it 'copys a message with equal initial state' do
+      it 'copies a message with equal initial state' do
         origin = Message.new({:a => 1})
         copy = origin.copy
 
         origin.as_hash.should ==(copy.as_hash)
       end
 
-      it 'copys a message with equal handlers' do
+      it 'copies a message with equal handlers' do
         origin = Message.new({:a => 1})
 
         consumed = []
