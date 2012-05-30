@@ -27,16 +27,37 @@ module EmPipelines::MessageValidity
     end
   end
 
-  def validate!(message)
-    self.validations.all? do |validation|
-      proc          = validation.proc
-      keys          = validation.keys
-      error_text    = validation.error_text
-      target_hash   = (message[validation.in] || message).to_hash
+  def validate!(message, monitoring)
+    failures = []
 
-      target_hash.values_at(*keys).all?(&proc).tap do |result|
-        monitoring.inform_error! "payload validation failed: #{error_text}" unless result
+    validations.each do |validation|
+      proc          = validation.class.proc
+      keys          = validation.keys
+      error_text    = validation.class.error_text
+      target_hash   = (message[validation.in] || message[:payload]).to_hash
+
+      keys.each do |key|
+        unless proc.call(target_hash[key])
+          failure = {
+            :error_text => error_text,
+            :key        => key,
+            :value      => target_hash[key],
+          }
+
+          failures << failure
+        end
       end
-    end || false.tap { message.broken! }
+    end
+
+    if failures.empty?
+      true
+    else
+      failures.each do |failure|
+        monitoring.inform_exception! "#{failure[:error_text]}: #{ {failure[:key] => failure[:value]} }"
+      end
+      false
+      # TODO: uncomment the next line:
+      # message.broken!
+    end
   end
 end

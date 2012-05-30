@@ -1,4 +1,5 @@
 require "empipelines/message"
+require "empipelines/stage"
 require "empipelines/message_validity"
 require "empipelines/message_validity/key_validations/presence"
 
@@ -7,9 +8,9 @@ module EmPipelines
     let(:em) { mock("eventmachine") }
     let(:monitoring) { mock("monitoring") }
     let(:test_class) do
-      class TestStage
+      class TestStage < EmPipelines::Stage
         class FakeMonitoring
-          def self.inform_error!(text)
+          def self.inform_exception!(text)
             text
           end
         end
@@ -40,10 +41,6 @@ module EmPipelines
     end
 
     context "method injection" do
-      it "[meta] makes sense" do
-        test_class.class.should == Class
-      end
-
       context "#validates_presence_of_keys" do
         it "injects the method on module inclusion" do
           test_class.should respond_to(:validates_presence_of_keys)
@@ -126,13 +123,13 @@ module EmPipelines
     context "#validate!" do
       context "with two presence requirements" do
         before do
-          define_validation(test_class, -> { validates_presence_of_keys :a, :in => :payload })
-          define_validation(test_class, -> { validates_presence_of_keys :a, :b, :in => :payload })
+          define_validation(test_class, -> { validates_presence_of_keys :a, :in => :top_level_key })
+          define_validation(test_class, -> { validates_presence_of_keys :b, :in => :top_level_key })
         end
 
         let(:valid_message) do
           original_hash = {
-            payload: {
+            top_level_key: {
               a: "1",
               b: 2,
             }
@@ -141,48 +138,87 @@ module EmPipelines
           Message.new(original_hash)
         end
 
-        let(:invalid_message) do
+        let(:invalid_message_one) do
           original_hash = {
-            payload: {
+            top_level_key: {
               b: 2,
+              c: 3,
             }
           }
 
           Message.new(original_hash)
         end
 
-        context "with a valid message" do
+        let(:invalid_message_two) do
+          original_hash = {
+            top_level_key: {
+              c: 3,
+            }
+          }
+
+          Message.new(original_hash)
+        end
+
+        context "with a totally valid message" do
           let(:message) { valid_message }
 
           it "judges validity correctly" do
-            test_class.validate!(message).should be_true
+            test_class.validate!(message, monitoring).should be_true
           end
 
           it "raises no errors" do
+            monitoring.should_not_receive(:inform_exception!)
+
             expect do
-              test_class.validate!(message)
+              test_class.validate!(message, monitoring)
             end.to_not raise_error
           end
         end
 
-        context "with an invalid message" do
-          let(:message) { invalid_message }
+        context "with a message failing one requirement" do
+          let(:message) { invalid_message_one }
 
           it "judges validity correctly" do
-            test_class.validate!(message).should be_false
+            monitoring.should_receive(:inform_exception!).once
+
+            test_class.validate!(message, monitoring).should be_false
           end
 
-          it "notifies monitoring of errors" do
-            test_class.monitoring.should_receive(:inform_error!).with(/payload validation failed/)
+          it "notifies monitoring of errors for each failing key" do
+            monitoring.should_receive(:inform_exception!).once
 
-            test_class.validate!(message)
+            test_class.validate!(message, monitoring)
           end
 
-          it "marks the message as broken" do
-            message.should_receive(:broken!)
+          # it "marks the message as broken once" do
+          #   monitoring.should_receive(:inform_exception!).once
+          #   message.should_receive(:broken!).once
 
-            test_class.validate!(message)
+          #   test_class.validate!(message, monitoring)
+          # end
+        end
+
+        context "with a message failing both requirements" do
+          let(:message) { invalid_message_two }
+
+          it "judges validity correctly" do
+            monitoring.should_receive(:inform_exception!).twice
+
+            test_class.validate!(message, monitoring).should be_false
           end
+
+          it "notifies monitoring of errors for each failing key" do
+            monitoring.should_receive(:inform_exception!).twice
+
+            test_class.validate!(message, monitoring)
+          end
+
+          # it "marks the message as broken once" do
+          #   monitoring.should_receive(:inform_exception!).twice
+          #   message.should_receive(:broken!).once
+
+          #   test_class.validate!(message, monitoring)
+          # end
         end
       end
     end

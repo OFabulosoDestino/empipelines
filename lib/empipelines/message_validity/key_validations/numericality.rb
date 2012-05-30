@@ -13,7 +13,7 @@ module EmPipelines::MessageValidity
     end
 
     def self.error_text
-      "required keys were not found in message"
+      "values required to be numeric weren't"
     end
 
     def self.declaration

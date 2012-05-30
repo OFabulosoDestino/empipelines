@@ -1,11 +1,16 @@
 require "empipelines/message_validity/key_validation"
+require "time"
 
 module EmPipelines::MessageValidity
   class Temporality < KeyValidation
     def self.proc
       ->(x) do
         begin
-          !!Time.parse(x)
+          if x.respond_to?(:to_time)
+            !!x.to_time
+          else
+            !!Time.parse(x)
+          end
         rescue ArgumentError, TypeError
           false
         end

@@ -5,6 +5,7 @@ gem 'json'
 gem 'eventmachine'
 gem 'em-http-request'
 gem 'amqp'
+gem 'activesupport'
 
 group :cucumber do
   gem 'activesupport'

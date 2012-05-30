@@ -7,7 +7,7 @@ module EmPipelines::MessageValidity
     end
 
     def self.error_text
-      "required keys were not found in message"
+      "required keys were not present"
     end
 
     def self.declaration

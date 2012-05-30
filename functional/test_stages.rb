@@ -1,4 +1,5 @@
 require "empipelines/message_validity"
+require "empipelines/stage"
 
 module TestStages
   class Monitoring
@@ -34,9 +35,12 @@ module TestStages
 
   module SomeStage
     @@last_id = 0
-    def initialize
+    attr_accessor :monitoring
+
+    def initialize(monitoring)
       @id = "module ##{(@@last_id)}"
       @@last_id += 1
+      super
     end
 
     def call(message, &callback)
@@ -45,7 +49,7 @@ module TestStages
     end
   end
 
-  class PassthroughStage
+  class PassthroughStage < EmPipelines::Stage
     include SomeStage
 
     def process(message, callback)
@@ -53,7 +57,7 @@ module TestStages
     end
   end
 
-  class RetryOscillator
+  class RetryOscillator < EmPipelines::Stage
     include SomeStage
 
     def process(message, callback)
@@ -62,7 +66,7 @@ module TestStages
     end
   end
 
-  class ShouldNotBeReachedStage
+  class ShouldNotBeReachedStage < EmPipelines::Stage
     include SomeStage
 
     def process(message, callback)
@@ -70,7 +74,7 @@ module TestStages
     end
   end
 
-  class ConsumeStage
+  class ConsumeStage < EmPipelines::Stage
     include SomeStage
 
     def process(message, callback)
@@ -78,7 +82,7 @@ module TestStages
     end
   end
 
-  class RejectStage
+  class RejectStage < EmPipelines::Stage
     include SomeStage
 
     def process(message, callback)
@@ -86,7 +90,7 @@ module TestStages
     end
   end
 
-  class BrokenMessageStage
+  class BrokenMessageStage < EmPipelines::Stage
     include SomeStage
 
     def process(message, callback)
@@ -94,26 +98,35 @@ module TestStages
     end
   end
 
-  class ValidatesPresenceStage
+  class ValidatesPresenceStage < EmPipelines::Stage
     include SomeStage
-    include EmPipelines::MessageValidity
+    extend EmPipelines::MessageValidity
 
-    validates_presence_of_keys :a, :b, :c, :d, :in => :top_level_key
+    validates_presence_of_keys :a, :b
 
     def process(message, callback)
-      self.class.validate!(message)
       callback.call(message)
     end
   end
 
-  class ValidatesNumericalityStage
+  class ValidatesNumericalityStage < EmPipelines::Stage
     include SomeStage
-    include EmPipelines::MessageValidity
+    extend EmPipelines::MessageValidity
 
-    validates_numericality_of_keys :d, :in => :top_level_key
+    validates_numericality_of_keys :c
 
     def process(message, callback)
-      self.class.validate!(message)
+      callback.call(message)
+    end
+  end
+
+  class ValidatesTemporalityStage < EmPipelines::Stage
+    include SomeStage
+    extend EmPipelines::MessageValidity
+
+    validates_temporality_of_keys :b
+
+    def process(message, callback)
       callback.call(message)
     end
   end

@@ -20,55 +20,64 @@ module EmPipelines
     end
   end
 
-  class AddOne
+  class StageMock
+    attr_accessor :monitoring
+
+    def initialize(monitoring)
+      @monitoring = monitoring
+    end
+  end
+
+  class AddOne < StageMock
     def call(input, &next_stage)
       next_stage.call(input.merge!({:data => (input[:data] + 1)}))
     end
   end
 
-  class Passthrough
+  class Passthrough < StageMock
     def call(input, &next_stage)
       next_stage.call(input)
     end
   end
 
-  class SquareIt
+  class SquareIt < StageMock
     def call(input, &next_stage)
       next_stage.call(input.merge!({:data => (input[:data] * input[:data])}))
     end
   end
 
-  class BrokenStage
+  class BrokenStage < StageMock
     def call(ignore, &ignored_too)
       raise 'Boo!'
     end
   end
 
-  class DeadEnd
+  class DeadEnd < StageMock
     def call(input, &also_ignore)
       #noop
     end
   end
 
-  class NeedsAnApple
+  class NeedsAnApple < StageMock
     def call(input, &next_stage)
       next_stage.call(input.merge!({:apple => apple}))
     end
   end
 
-  class NeedsAnOrange
+  class NeedsAnOrange < StageMock
     def call(input, &next_stage)
       next_stage.call(input.merge!({:orange => orange}))
     end
   end
 
-  class GlobalHolder
+  class GlobalHolder < StageMock
     @@value = nil
     def GlobalHolder.held
       @@value
     end
 
-    def initialize
+    def initialize(monitoring)
+      @monitoring = monitoring
       @@value = nil
     end
 
@@ -79,7 +88,6 @@ module EmPipelines
   end
 
   class StubSpawner
-
     class StubProcess
       def initialize(block)
         @block = block

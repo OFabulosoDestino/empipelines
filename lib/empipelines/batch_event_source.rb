@@ -3,10 +3,10 @@ require 'empipelines/event_source'
 
 module EmPipelines
   class BatchEventSource < EventSource
-    
+
     def initialize(em, list_name, events)
       @num_finalised = 0
-      @em, @list_name, @events = em, list_name,events
+      @em, @list_name, @events = em, list_name, events
     end
 
     def start!

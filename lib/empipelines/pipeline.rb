@@ -21,11 +21,14 @@ module EmPipelines
         @em.spawn do |input_message|
           begin
             monitoring.debug "#{next_stage.class}#notify with #{input_message}}"
+            if next_stage.class.respond_to?(:validate!)
+              monitoring.debug "#{next_stage.class}.validate!"
+              next_stage.class.validate!(input_message, monitoring)
+            end
             next_stage.call(input_message) do |output|
               current_head.notify(output)
             end
-          # TODO: Really? Rescue _all_ the exceptions?
-          rescue => exception
+          rescue => exception # TODO: Really? all of them?
             monitoring.inform_exception!(exception, next_stage, "Message #{input_message} is broken")
             input_message.broken!
           end
@@ -38,7 +41,7 @@ module EmPipelines
     private
     def instantiate_with_dependencies
       lambda do |stage_class|
-        stage_instance = stage_class.new
+        stage_instance = stage_class.new(@monitoring)
         @context.each do |name, value|
           stage_instance.define_singleton_method(name) { value }
         end

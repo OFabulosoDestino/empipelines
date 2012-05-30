@@ -3,11 +3,9 @@ module EmPipelines::MessageValidity
   class KeyValidation
     attr_accessor :keys, :error_text, :in, :proc
 
-    # this class is explicitly abstract™
-    class ImplementInSubclassError < NotImplementedError
-      def initialize
-        super("Implement in subclasses")
-      end
+    def initialize(keys, top_level_key=nil)
+      self.in = top_level_key
+      self.keys = keys
     end
 
     # a unary function to validate each datum
@@ -34,9 +32,11 @@ module EmPipelines::MessageValidity
       raise ImplementInSubclassError.new
     end
 
-    def initialize(keys, top_level_key=nil)
-      self.in = top_level_key
-      self.keys = keys
+    # this class is explicitly abstract™ (kinda)
+    class ImplementInSubclassError < NotImplementedError
+      def initialize
+        super("Implement in subclasses")
+      end
     end
 
     # TODO: shouldn't we be able to have Set properties
