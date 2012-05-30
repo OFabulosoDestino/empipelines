@@ -22,7 +22,6 @@ module EmPipelines
           begin
             monitoring.debug "#{next_stage.class}#notify with #{input_message}}"
             if next_stage.class.respond_to?(:validate!)
-              monitoring.debug "#{next_stage.class}.validate!"
               next_stage.class.validate!(input_message, monitoring)
             end
             next_stage.call(input_message) do |output|

@@ -28,9 +28,13 @@ module EmPipelines::MessageValidity
   end
 
   def validate!(message, monitoring)
+    monitoring.debug "MessageValidity.validate! called"
+
     failures = []
 
     validations.each do |validation|
+      monitoring.debug "MessageValidity.validate! running validation: #{validation.class.name}"
+
       proc          = validation.class.proc
       keys          = validation.keys
       error_text    = validation.class.error_text
