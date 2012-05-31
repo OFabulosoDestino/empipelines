@@ -6,3 +6,5 @@ config
 .DS_Store
 vendor
 *#*
+pkg
+pkg/*
