@@ -83,9 +83,9 @@ module EmPipelines
           end
 
           it "allows overrides" do
-            define_validation(test_class, -> { validates_presence_of_keys :a, :in => :payload })
+            define_validation(test_class, -> { validates_presence_of_keys :a, :in => :foo })
 
-            test_class.validations.should include(EmPipelines::MessageValidity::Presence.new([:a], :payload))
+            test_class.validations.should include(EmPipelines::MessageValidity::Presence.new([:a], :foo))
           end
 
           it "shouldnt fall over if, for whatever reason, nil is specified explicitly" do
@@ -126,15 +126,17 @@ module EmPipelines
     context "#validate!" do
       context "with two presence requirements" do
         before do
-          define_validation(test_class, -> { validates_presence_of_keys :a, :in => :top_level_key })
-          define_validation(test_class, -> { validates_presence_of_keys :b, :in => :top_level_key })
+          define_validation(test_class, -> { validates_presence_of_keys :a, :in => :nest })
+          define_validation(test_class, -> { validates_presence_of_keys :b, :in => :nest })
         end
 
         let(:valid_message) do
           original_hash = {
-            top_level_key: {
-              a: "1",
-              b: 2,
+            payload: {
+              nest: {
+                a: "1",
+                b: 2,
+              }
             }
           }
 
@@ -143,9 +145,11 @@ module EmPipelines
 
         let(:invalid_message_one) do
           original_hash = {
-            top_level_key: {
-              b: 2,
-              c: 3,
+            payload: {
+              nest: {
+                b: "1",
+                c: 2,
+              }
             }
           }
 
@@ -154,8 +158,10 @@ module EmPipelines
 
         let(:invalid_message_two) do
           original_hash = {
-            top_level_key: {
-              c: 3,
+            payload: {
+              nest: {
+                c: 3,
+              }
             }
           }
 

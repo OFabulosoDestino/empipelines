@@ -16,6 +16,7 @@ module EmPipelines::MessageValidity
 
   [ Presence, Numericality, Temporality ].each do |validation|
     send(:define_method, validation.declaration) do |*args|
+      # TODO: extract 'in' argument without using `last`
       top_level_key =
         if (in_hash = args.last).is_a?(Hash)
           args.delete(in_hash)[:in].try(:to_sym)
@@ -38,7 +39,7 @@ module EmPipelines::MessageValidity
       proc          = validation.class.proc
       keys          = validation.keys
       error_text    = validation.class.error_text
-      target_hash   = (message[validation.in] || message[:payload]).to_hash
+      target_hash   = (message[:payload][validation.in] || message[:payload]).to_hash
 
       keys.each do |key|
         unless proc.call(target_hash[key])
