@@ -102,9 +102,10 @@ module TestStages
     include SomeStage
     extend EmPipelines::MessageValidity
 
-    validates_presence_of_keys :a, :b
+    validates_presence_of_keys :a, :b, :c, :d
 
     def process(message, callback)
+      validate!(message)
       callback.call(message)
     end
   end
@@ -116,6 +117,7 @@ module TestStages
     validates_numericality_of_keys :c
 
     def process(message, callback)
+      validate!(message)
       callback.call(message)
     end
   end
@@ -127,6 +129,7 @@ module TestStages
     validates_temporality_of_keys :b
 
     def process(message, callback)
+      validate!(message)
       callback.call(message)
     end
   end

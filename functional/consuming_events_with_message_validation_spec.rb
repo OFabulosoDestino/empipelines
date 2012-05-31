@@ -66,29 +66,18 @@ module TestStages
         [
           {
             :a => "the smallest weird number",
-            :c => 3,
-            :d => "about €20",
-          },
-          {
-            :b => Time.new,
-            :c => "4",
-            :d => "☃",
-          },
-          {
-            :a => "USA!! USA!!! USA!!!!",
             :b => "all! the! time!",
-            :c => "threeve",
-            :d => "chicken tikka masala",
+            :c => 3,
+            :d => nil,
           },
         ].map(&:to_json)
       end
 
-      it "pipeline executes each stage, reporting all validation errors" do
-        monitoring.should_receive(:inform_exception!).with(/required keys were not present(.*?):b/).once
-        monitoring.should_receive(:inform_exception!).with(/required keys were not present(.*?):a/).once
-        monitoring.should_receive(:inform_exception!).with(/values required to be numeric weren't(.*?):c/).once
-        monitoring.should_receive(:inform_exception!).with(/values required to be be parsed as Time couldn't be(.*?):b/).twice
+      it "pipeline executes each stage, monitoring receives every validation error for every executed stage" do
+        monitoring.should_receive(:inform_exception!).with(/required keys were not present(.*?):d/).once
+        monitoring.should_receive(:inform_exception!).with(/values required to be be parsed as Time couldn't be(.*?):b/).once
 
+        error_count = 2
         EM.run do
           exchange, queue = setup_queues
 
@@ -102,7 +91,6 @@ module TestStages
 
           EM.add_timer(1) do
             EM.stop
-            processed.size.should ==(stages.size * messages.size)
           end
 
           event_pipeline.start!

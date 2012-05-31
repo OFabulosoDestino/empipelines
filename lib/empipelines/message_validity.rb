@@ -10,6 +10,8 @@ module EmPipelines::MessageValidity
   def self.extended(base)
     base.cattr_accessor :validations
     base.validations ||= Set.new
+
+    base.send(:include, InstanceMethods)
   end
 
   [ Presence, Numericality, Temporality ].each do |validation|
@@ -28,8 +30,6 @@ module EmPipelines::MessageValidity
   end
 
   def validate!(message, monitoring)
-    monitoring.debug "MessageValidity.validate! called"
-
     failures = []
 
     validations.each do |validation|
@@ -60,8 +60,12 @@ module EmPipelines::MessageValidity
         monitoring.inform_exception! "#{failure[:error_text]}: #{ {failure[:key] => failure[:value]} }"
       end
       false
-      # TODO: uncomment the next line:
-      # message.broken!
+    end
+  end
+
+  module InstanceMethods
+    def validate!(message)
+      self.class.validate!(message, monitoring)
     end
   end
 end
