@@ -10,7 +10,7 @@ module EmPipelines
     let(:test_class) do
       class TestStage < EmPipelines::Stage
         class FakeMonitoring
-          def self.inform_exception!(text)
+          def self.error(text)
             text
           end
           def self.debug(text)
@@ -172,7 +172,7 @@ module EmPipelines
           end
 
           it "raises no errors" do
-            monitoring.should_not_receive(:inform_exception!)
+            monitoring.should_not_receive(:error)
             monitoring.should_receive(:debug).any_number_of_times
 
             expect do
@@ -185,21 +185,21 @@ module EmPipelines
           let(:message) { invalid_message_one }
 
           it "judges validity correctly" do
-            monitoring.should_receive(:inform_exception!).once
+            monitoring.should_receive(:error).once
             monitoring.should_receive(:debug).any_number_of_times
 
             test_class.validate!(message, monitoring).should be_false
           end
 
           it "notifies monitoring of errors for each failing key" do
-            monitoring.should_receive(:inform_exception!).once
+            monitoring.should_receive(:error).once
             monitoring.should_receive(:debug).any_number_of_times
 
             test_class.validate!(message, monitoring)
           end
 
           # it "marks the message as broken once" do
-          #   monitoring.should_receive(:inform_exception!).once
+          #   monitoring.should_receive(:error).once
           #   message.should_receive(:broken!).once
           #   monitoring.should_receive(:debug).any_number_of_times
 
@@ -211,21 +211,21 @@ module EmPipelines
           let(:message) { invalid_message_two }
 
           it "judges validity correctly" do
-            monitoring.should_receive(:inform_exception!).twice
+            monitoring.should_receive(:error).twice
             monitoring.should_receive(:debug).any_number_of_times
 
             test_class.validate!(message, monitoring).should be_false
           end
 
           it "notifies monitoring of errors for each failing key" do
-            monitoring.should_receive(:inform_exception!).twice
+            monitoring.should_receive(:error).twice
             monitoring.should_receive(:debug).any_number_of_times
 
             test_class.validate!(message, monitoring)
           end
 
           # it "marks the message as broken once" do
-          #   monitoring.should_receive(:inform_exception!).twice
+          #   monitoring.should_receive(:error).twice
           #   message.should_receive(:broken!).once
           #   monitoring.should_receive(:debug).any_number_of_times
 

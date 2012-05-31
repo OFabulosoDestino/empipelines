@@ -4,7 +4,7 @@ require File.join(File.dirname(__FILE__), 'test_stages')
 
 module TestStages
   describe 'Consumption of events from a in-memory batch' do
-    let(:monitoring) { stub(:inform => nil, :debug => nil) }
+    let(:monitoring) { stub(:inform => nil, :debug => nil, :error => nil) }
     let (:processed) { [] }
     include EmRunner
 

@@ -9,7 +9,7 @@ QueueName = "empipelines.build.queue"
 
 module TestStages
   describe "Consumption of events from multiple sources" do
-    let(:monitoring) { stub(:inform => nil, :debug => nil) }
+    let(:monitoring) { stub(:inform => nil, :debug => nil, :error => nil) }
     let(:processed) { [] }
     let(:messages) { }
 
@@ -36,7 +36,7 @@ module TestStages
       end
 
       it "pipeline executes #process for each stage without errors" do
-        monitoring.should_not_receive(:inform_exception!)
+        monitoring.should_not_receive(:error)
 
         expect do
           EM.run do
@@ -74,8 +74,8 @@ module TestStages
       end
 
       it "pipeline executes each stage, monitoring receives every validation error for every executed stage" do
-        monitoring.should_receive(:inform_exception!).with(/required keys were not present(.*?):d/).once
-        monitoring.should_receive(:inform_exception!).with(/values required to be be parsed as Time couldn't be(.*?):b/).once
+        monitoring.should_receive(:error).with(/required keys were not present(.*?):d/).once
+        monitoring.should_receive(:error).with(/values required to be be parsed as Time couldn't be(.*?):b/).once
 
         error_count = 2
         EM.run do

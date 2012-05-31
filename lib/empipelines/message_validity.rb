@@ -57,7 +57,7 @@ module EmPipelines::MessageValidity
       true
     else
       failures.each do |failure|
-        monitoring.inform_exception! "#{failure[:error_text]}: #{ {failure[:key] => failure[:value]} }"
+        monitoring.error "#{failure[:error_text]}: #{ {failure[:key] => failure[:value]} }"
       end
       false
     end
