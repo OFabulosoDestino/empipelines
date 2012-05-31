@@ -197,14 +197,6 @@ module EmPipelines
 
             test_class.validate!(message, monitoring)
           end
-
-          # it "marks the message as broken once" do
-          #   monitoring.should_receive(:error).once
-          #   message.should_receive(:broken!).once
-          #   monitoring.should_receive(:debug).any_number_of_times
-
-          #   test_class.validate!(message, monitoring)
-          # end
         end
 
         context "with a message failing both requirements" do
@@ -223,14 +215,6 @@ module EmPipelines
 
             test_class.validate!(message, monitoring)
           end
-
-          # it "marks the message as broken once" do
-          #   monitoring.should_receive(:error).twice
-          #   message.should_receive(:broken!).once
-          #   monitoring.should_receive(:debug).any_number_of_times
-
-          #   test_class.validate!(message, monitoring)
-          # end
         end
       end
     end
