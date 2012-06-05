@@ -55,26 +55,26 @@ module EmPipelines::MessageValidity
     end
 
     context ".proc" do
-      it "should raise a NotImplementedError error if instantiated directly" do
+      it "should raise a NoMethodError error if instantiated directly" do
         expect do
           KeyValidation.proc
-        end.to raise_error(NotImplementedError)
+        end.to raise_error(NoMethodError)
       end
     end
 
     context ".error_text" do
-      it "should raise a NotImplementedError error if instantiated directly" do
+      it "should raise a NoMethodError error if instantiated directly" do
         expect do
           KeyValidation.error_text
-        end.to raise_error(NotImplementedError)
+        end.to raise_error(NoMethodError)
       end
     end
 
     context ".declaration" do
-      it "should raise a NotImplementedError error if instantiated directly" do
+      it "should raise a NoMethodError error if instantiated directly" do
         expect do
           KeyValidation.declaration
-        end.to raise_error(NotImplementedError)
+        end.to raise_error(NoMethodError)
       end
     end
   end

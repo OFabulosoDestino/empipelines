@@ -1,5 +1,8 @@
-require 'empipelines/message'
-require 'empipelines/pipeline'
+require "empipelines/message"
+require "empipelines/pipeline"
+require "empipelines/stage"
+require "empipelines/message_validity"
+require "empipelines/message_validity/key_validations/presence"
 
 def msg(some_map)
   EmPipelines:: MessageMock.new(some_map)
@@ -8,86 +11,71 @@ end
 module EmPipelines
   class MessageMock < EmPipelines::Message
     def consumed!
-      raise 'unexpected call'
+      raise "consumed! should not have been called"
     end
 
     def rejected!
-      raise 'unexpected call'
+      raise "rejected! should not have been called"
     end
 
     def broken!
-      raise 'unexpected call'
+      raise "broken! should not have been called"
     end
   end
 
-  class StageMock
-    attr_accessor :monitoring
+  class Passthrough < EmPipelines::Stage
+  end
 
-    def initialize(monitoring)
-      @monitoring = monitoring
+  class EnsureNotNil < EmPipelines::Stage
+    extend EmPipelines::MessageValidity
+
+    validates_presence_of_keys :a
+
+    def call(input, &next_stage)
+      validate!(input) && next_stage.call(input)
     end
   end
 
-  class AddOne < StageMock
+  class AddOne < EmPipelines::Stage
     def call(input, &next_stage)
       next_stage.call(input.merge!({:data => (input[:data] + 1)}))
     end
   end
 
-  class Passthrough < StageMock
-    def call(input, &next_stage)
-      next_stage.call(input)
-    end
-  end
-
-  class SquareIt < StageMock
+  class SquareIt < EmPipelines::Stage
     def call(input, &next_stage)
       next_stage.call(input.merge!({:data => (input[:data] * input[:data])}))
     end
   end
 
-  class BrokenStage < StageMock
+  class BrokenStage < EmPipelines::Stage
     def call(ignore, &ignored_too)
-      raise 'Boo!'
+      raise "Boo!"
     end
   end
 
-  class DeadEnd < StageMock
+  class DeadEnd < EmPipelines::Stage
     def call(input, &also_ignore)
       #noop
     end
   end
 
-  class NeedsAnApple < StageMock
+  class NeedsAnApple < EmPipelines::Stage
     def call(input, &next_stage)
       next_stage.call(input.merge!({:apple => apple}))
     end
   end
 
-  class NeedsAnOrange < StageMock
+  class NeedsAnOrange < EmPipelines::Stage
     def call(input, &next_stage)
       next_stage.call(input.merge!({:orange => orange}))
     end
   end
 
-  class GlobalHolder < StageMock
-    @@value = nil
-    def GlobalHolder.held
-      @@value
-    end
-
-    def initialize(monitoring)
-      @monitoring = monitoring
-      @@value = nil
-    end
-
-    def call(input, &next_step)
-      @@value = input
-      next_step.call(input)
-    end
+  class GlobalHolder < EmPipelines::Stage
   end
 
-  class StubSpawner
+  class MockEM
     class StubProcess
       def initialize(block)
         @block = block
@@ -105,58 +93,85 @@ module EmPipelines
 
   describe Pipeline do
     let(:monitoring) { stub(:inform => nil, :debug => nil) }
+    let(:em) { MockEM.new }
+    let(:services) { { :foo => 4, :bar => Object.new, :baz => "a thing!" } }
+    let(:stages) { [ AddOne, SquareIt, GlobalHolder ] }
+    let(:pipeline) { Pipeline.new(em, services, monitoring) }
 
-    it 'chains the actions using processes' do
-      event_chain = [AddOne, SquareIt, GlobalHolder]
-      a_msg = msg({:data =>1})
-      a_msg.should_receive(:consumed!)
-
-      pipelines = Pipeline.new(StubSpawner.new, {}, monitoring)
-      pipeline = pipelines.for(event_chain)
-      pipeline.notify(a_msg)
-
-      GlobalHolder.held[:data].should ==(4)
+    context "#initialize" do
+      it "sets instance variables, defines attr_accessors" do
+        pipeline.em.should ==(em)
+        pipeline.monitoring.should ==(monitoring)
+        pipeline.services.should ==(services)
+      end
     end
 
-    it 'does not send to the next if last returned nil' do
-      event_chain = [AddOne, SquareIt, DeadEnd, GlobalHolder]
-      pipelines = Pipeline.new(StubSpawner.new, {}, monitoring)
-      pipeline = pipelines.for(event_chain)
-      pipeline.notify(msg({:data => 1}))
-      GlobalHolder.held.should be_nil
+    context "#for" do
+      it "instantiates each Stage subclass, injects @services" do
+        stages.each do |e|
+          e.should_receive(:new).with(hash_including(services))
+        end
+
+        pipeline.for(stages)
+      end
+
+      it "for each service, each stage has an instance variable defined on it which points to the service instance" do
+        pipeline.for(stages)
+
+        pipeline.
+          stages.
+            each do |stage|
+              services.each do |k,v|
+                stage.send(k).should ==(v)
+              end
+            end
+      end
+
+      context "with a Validation Stage" do
+        let(:stages) { [ AddOne, SquareIt, GlobalHolder ] << EnsureNotNil }
+
+        it "should instantiate the Validation Stage properly" do
+          pipeline = Pipeline.new(em, services, monitoring)
+          pipeline.for(stages)
+
+          stage = pipeline.stages.find { |s| EnsureNotNil === s }
+
+          stage.should_not be_nil
+          stage.should respond_to(:validate!)
+          stage.validations.should_not be_empty
+        end
+      end
     end
 
-    it 'makes all objects in the context object available to stages' do
-      event_chain = [NeedsAnApple, NeedsAnOrange, GlobalHolder]
-      pipelines = Pipeline.new(StubSpawner.new, {:apple => :some_apple, :orange => :some_orange}, monitoring)
-      a_msg = msg({})
-      a_msg.should_receive(:consumed!)
+    context "#notify" do
+      it "does not call the next if last returned nil" do
+        GlobalHolder.should_not_receive(:call)
 
-      pipeline = pipelines.for(event_chain)
-      pipeline.notify(a_msg)
+        stages = [AddOne, SquareIt, DeadEnd, GlobalHolder]
+        pipelines = Pipeline.new(em, {:bar => 123}, monitoring)
+        pipeline = pipelines.for(stages)
+        pipeline.notify(msg({:data => 1}))
+      end
 
-      GlobalHolder.held[:apple].should ==(:some_apple)
-      GlobalHolder.held[:orange].should ==(:some_orange)
-    end
+      it "marks message as broken if uncaught exception" do
+        a_msg = msg({})
+        monitoring.should_receive(:inform_exception!)
 
-    it 'marks message as broken if uncaught exception' do
-      a_msg = msg({})
-      monitoring.should_receive(:inform_exception!)
+        a_msg.should_receive(:broken!)
 
-      a_msg.should_receive(:broken!)
+        pipeline = Pipeline.new(em, {}, monitoring)
+        pipeline.for([BrokenStage]).notify(a_msg)
+      end
 
-      pipeline = Pipeline.new(StubSpawner.new, {}, monitoring)
-      pipeline.for([BrokenStage]).notify(a_msg)
-    end
+      it "flags the message as consumed if it goes through all stages" do
+        stages = [Passthrough, AddOne, Passthrough, SquareIt, Passthrough]
+        pipelines = Pipeline.new(em, {}, monitoring)
+        pipeline = pipelines.for(stages)
+        a_msg = msg({:data => 1})
+        a_msg.should_receive(:consumed!)
 
-    it 'flags the message as consumed if goest through all stages' do
-      event_chain = [Passthrough, Passthrough]
-      pipelines = Pipeline.new(StubSpawner.new, {}, monitoring)
-      pipeline = pipelines.for(event_chain)
-      a_msg = msg({:data => :whatevah})
-      a_msg.should_receive(:consumed!)
-
-      pipeline.notify(a_msg)
+        pipeline.notify(a_msg)
+      end
     end
   end
 end

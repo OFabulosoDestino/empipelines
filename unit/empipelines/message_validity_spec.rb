@@ -18,8 +18,9 @@ module EmPipelines
           end
         end
 
-        cattr_accessor :monitoring
-        @@monitoring = FakeMonitoring
+        def initialize(services={})
+          super({ :monitoring => FakeMonitoring.new }.merge(services))
+        end
       end
 
       TestStage
@@ -41,6 +42,20 @@ module EmPipelines
     before do
       inject_module_into test_class
       reset_attrs! test_class
+    end
+
+    context "#initialize" do
+      it "doesn't throw an error" do
+        expect do
+          test_class.new
+        end.to_not raise_error
+      end
+
+      it "calls super" do
+        EmPipelines::Stage.should_receive(:new)
+
+        test_class.new
+      end
     end
 
     context "method injection" do

@@ -1,8 +1,25 @@
+require "amqp"
 require "empipelines/message_validity"
 require "empipelines/stage"
 
+ExchangeName  = "empipelines.build"
+QueueName     = "empipelines.build.queue"
+
 module TestStages
-  class Monitoring
+
+  def self.setup_queues(exchange_name=ExchangeName, queue_name=QueueName)
+    connection = AMQP.connect()
+    channel = AMQP::Channel.new(connection)
+    channel.prefetch(1)
+
+    exchange = channel.direct(exchange_name, :durable => true)
+    queue = channel.queue(queue_name, :durable => true)
+    queue.bind(exchange)
+    queue.purge
+    [exchange, queue]
+  end
+
+  class MockMonitoring
     def initialize(output = false)
       @output = output
     end
@@ -13,6 +30,10 @@ module TestStages
 
     def debug(txt)
       puts "#{Time.now.usec} DEBUG: #{txt}" if @output
+    end
+
+    def inform_error!(err)
+      puts "#{err}" if @output
     end
 
     def inform_exception!(exc, origin, extra = nil)
@@ -33,104 +54,129 @@ module TestStages
     end
   end
 
-  module SomeStage
-    @@last_id = 0
-    attr_accessor :monitoring
-
-    def initialize(monitoring)
-      @id = "module ##{(@@last_id)}"
-      @@last_id += 1
-      super
-    end
-
+  # Later, we'll need to inspect `processed` as part of test assertions
+  module CallerTestingOverride
     def call(message, &callback)
       processed << [@id, message.co_id]
-      process(message, callback)
+      super
     end
   end
 
   class PassthroughStage < EmPipelines::Stage
-    include SomeStage
-
-    def process(message, callback)
-      callback.call(message.merge!({}))
+    module Caller
+      def call(message, &callback)
+        callback.call(message.merge!({}))
+      end
     end
+
+    include Caller
+    include CallerTestingOverride
   end
 
   class RetryOscillator < EmPipelines::Stage
-    include SomeStage
-
-    def process(message, callback)
-      @flip = !@flip || false
-      message.rejected! if @flip
+    module Caller
+      def call(message, &callback)
+        @flip = !@flip || false
+        message.rejected! if @flip
+      end
     end
+
+    include Caller
+    include CallerTestingOverride
   end
 
   class ShouldNotBeReachedStage < EmPipelines::Stage
-    include SomeStage
-
-    def process(message, callback)
-      raise "should not be reached but got #{message}!"
+    module Caller
+      def call(message, &callback)
+        raise "should not be reached but got #{message}!"
+      end
     end
+
+    include Caller
+    include CallerTestingOverride
   end
 
   class ConsumeStage < EmPipelines::Stage
-    include SomeStage
-
-    def process(message, callback)
-      message.consumed!
+    module Caller
+      def call(message, &callback)
+        message.consumed!
+      end
     end
+
+    include Caller
+    include CallerTestingOverride
   end
 
   class RejectStage < EmPipelines::Stage
-    include SomeStage
-
-    def process(message, callback)
-      message.rejected!
+    module Caller
+      def call(message, &callback)
+        message.rejected!
+      end
     end
+
+    include Caller
+    include CallerTestingOverride
   end
 
   class BrokenMessageStage < EmPipelines::Stage
-    include SomeStage
-
-    def process(message, callback)
-      message.broken!
+    module Caller
+      def call(message, &callback)
+        message.broken!
+      end
     end
+
+    include Caller
+    include CallerTestingOverride
   end
 
   class ValidatesPresenceStage < EmPipelines::Stage
-    include SomeStage
     extend EmPipelines::MessageValidity
 
     validates_presence_of_keys :a, :b, :c, :d
 
-    def process(message, callback)
-      validate!(message)
-      callback.call(message)
+    module Caller
+      def call(message, &callback)
+        message.broken! unless validate!(message)
+
+        callback.call(message)
+      end
     end
+
+    include Caller
+    include CallerTestingOverride
   end
 
   class ValidatesNumericalityStage < EmPipelines::Stage
-    include SomeStage
     extend EmPipelines::MessageValidity
 
     validates_numericality_of_keys :c
 
-    def process(message, callback)
-      validate!(message)
-      callback.call(message)
+    module Caller
+      def call(message, &callback)
+        message.broken! unless validate!(message)
+
+        callback.call(message)
+      end
     end
+
+    include Caller
+    include CallerTestingOverride
   end
 
   class ValidatesTemporalityStage < EmPipelines::Stage
-    include SomeStage
     extend EmPipelines::MessageValidity
 
     validates_temporality_of_keys :b
 
-    def process(message, callback)
-      validate!(message)
-      callback.call(message)
+    module Caller
+      def call(message, &callback)
+        message.broken! unless validate!(message)
+
+        callback.call(message)
+      end
     end
+
+    include Caller
+    include CallerTestingOverride
   end
 end

@@ -4,12 +4,14 @@ require File.join(File.dirname(__FILE__), 'test_stages')
 
 module TestStages
   describe 'Consumption of events from a file' do
-    let(:monitoring) { stub(:inform => nil, :debug => nil) }
-    let (:processed) { [] }
+    let(:monitoring) { TestStages::MockMonitoring.new }
+    let(:processed) { [] }
+    let(:timeout) { 0.1 }
+
     include EmRunner
 
     it 'consumes all events from the file' do
-      with_em_timeout(10) do
+      with_em_timeout(timeout) do
         pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring)
 
         file_name = File.join(File.dirname(__FILE__), 'events.dat')

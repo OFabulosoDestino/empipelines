@@ -4,12 +4,12 @@ require File.join(File.dirname(__FILE__), 'test_stages')
 
 module TestStages
   describe 'Consumption of events from a in-memory batch' do
-    let(:monitoring) { stub(:inform => nil, :debug => nil, :error => nil) }
-    let (:processed) { [] }
+    let(:monitoring) { MockMonitoring.new }
+    let(:processed) { [] }
     include EmRunner
 
     it 'consumes all events from the a queue' do
-      with_em_timeout(10) do
+      with_em_timeout(2) do
         pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring)
 
         batch = (1...1000).to_a
