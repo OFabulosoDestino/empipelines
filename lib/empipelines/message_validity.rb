@@ -11,7 +11,7 @@ module EmPipelines::MessageValidity
     base.cattr_accessor :validations
     base.validations ||= Set.new
 
-    base.send(:include, InstanceMethods)
+    base.send(:include, InstanceInterface)
   end
 
   [ Presence, Numericality, Temporality ].each do |validation|
@@ -64,7 +64,7 @@ module EmPipelines::MessageValidity
     end
   end
 
-  module InstanceMethods
+  module InstanceInterface
     def validate!(message)
       self.class.validate!(message, monitoring)
     end
