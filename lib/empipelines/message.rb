@@ -95,12 +95,12 @@ module EmPipelines
     end
 
     def backing_hash!(other)
-      @backing_hash = symbolised(other)
+      @backing_hash = symbolized(other)
     end
 
-    def symbolised(raw_hash)
+    def symbolized(raw_hash)
       raw_hash.reduce({}) do |acc, (key, value)|
-        acc[key.to_s.to_sym] = value.is_a?(Hash) ? symbolised(value) : value
+        acc[key.to_s.to_sym] = value.is_a?(Hash) ? symbolized(value) : value
         acc
       end
     end
