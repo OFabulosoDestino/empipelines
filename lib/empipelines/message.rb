@@ -18,17 +18,20 @@ module EmPipelines
     end
 
     def []=(key, value)
-      check_if_mutation_allowed
+      assert_mutation_allowed!
+
       to_hash[key] = value
     end
 
     def delete(key)
-      check_if_mutation_allowed
+      assert_mutation_allowed!
+
       to_hash.delete key
     end
 
     def merge!(other_hash)
-      check_if_mutation_allowed
+      assert_mutation_allowed!
+
       backing_hash!(to_hash.merge(other_hash))
       self
     end
@@ -46,21 +49,15 @@ module EmPipelines
     end
 
     def consumed!
-      check_if_mutation_allowed
-      @state = :consumed
-      invoke(@consumed_callback)
+      transition!(:consumed, @consumed_callback) unless @state == :broken
     end
 
     def rejected!
-      check_if_mutation_allowed
-      @state = :rejected
-      invoke(@rejected_callback)
+      transition!(:rejected, @rejected_callback)
     end
 
     def broken!
-      check_if_mutation_allowed
-      @state = :broken
-      invoke(@broken_callback)
+      transition!(:broken, @broken_callback)
     end
 
     def processed?
@@ -87,6 +84,10 @@ module EmPipelines
       "#{self.class.name} co_id:#{co_id} state:#{@state} backing_hash:#{to_hash}"
     end
 
+    def created!
+      @state = :created
+    end
+
     private
     def create_correlation_id!
       @@count += 1
@@ -105,12 +106,18 @@ module EmPipelines
       end
     end
 
-    def created!
-      @state = :created
+    def assert_mutation_allowed!
+      raise "Cannot mutate #{self}" if processed?
     end
 
-    def check_if_mutation_allowed
-      raise "Cannot mutate #{self}" if processed?
+    def transition!(to, callback=nil)
+      if @state == to
+        invoke(nil)
+      else
+        assert_mutation_allowed!
+        @state = to
+        invoke(callback)
+      end
     end
 
     def invoke(callback)

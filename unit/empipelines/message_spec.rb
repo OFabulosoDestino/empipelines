@@ -151,6 +151,83 @@ module EmPipelines
         lambda{ read.call(broken) }.should_not raise_error
         lambda{ mutate.call(broken) }.should raise_error
       end
+
+      context "state machine behavior" do
+        # TODO: every transition should have specs.
+        context "transitions" do
+          let(:m) { Message.new }
+
+          context '`consumed -> consumed`' do
+            let(:state) { :consumed }
+            let(:m) { Message.new.tap{ |m| m.consumed! ; m.on_consumed { raise "!" } } }
+
+            it "loops back without error" do
+              expect do
+                m.consumed!
+
+                m.state.should ==(state)
+              end.to_not raise_error
+            end
+
+            it "doesn't execute the stage's usual callback" do
+              m.instance_variable_get(:"@consumed_callback").should_not_receive(:call)
+
+              m.consumed!
+            end
+          end
+
+          context '`created -> created`' do
+            let(:state) { :created }
+            let(:m) { Message.new.tap{ |m| m.created! } }
+
+            it "loops back without error" do
+              expect do
+                m.created!
+
+                m.state.should ==(state)
+              end.to_not raise_error
+            end
+          end
+
+          context '`broken -> broken`' do
+            let(:state) { :broken }
+            let(:m) { Message.new.tap{ |m| m.broken! ; m.on_broken { raise "!" } } }
+
+            it "loops back without error" do
+              expect do
+                m.broken!
+
+                m.state.should ==(state)
+              end.to_not raise_error
+            end
+
+            it "doesn't execute the stage's usual callback" do
+              m.instance_variable_get(:"@broken_callback").should_not_receive(:call)
+
+              m.broken!
+            end
+          end
+
+          context '`rejected -> rejected`' do
+            let(:state) { :rejected }
+            let(:m) { Message.new.tap{ |m| m.rejected! ; m.on_rejected { raise "!" } } }
+
+            it "loops back without error" do
+              expect do
+                m.rejected!
+
+                m.state.should ==(state)
+              end.to_not raise_error
+            end
+
+            it "doesn't execute the stage's usual callback" do
+              m.instance_variable_get(:"@rejected_callback").should_not_receive(:call)
+
+              m.rejected!
+            end
+          end
+        end
+      end
     end
 
     context 'cloning messages' do
