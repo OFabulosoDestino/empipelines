@@ -1,7 +1,9 @@
+require "active_support/core_ext/object/try"
+
 module EmPipelines
   class Message
+    # TODO: this'd be a nice candidate for AASM
     attr_reader :state, :co_id
-
     @@count = 0
 
     def initialize(base_hash={}, origin=nil)
@@ -112,7 +114,7 @@ module EmPipelines
     end
 
     def invoke(callback)
-      callback.call(self) if callback
+      callback.try(:call, self)
     end
   end
 end
