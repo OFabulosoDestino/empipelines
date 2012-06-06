@@ -4,8 +4,8 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 module EmPipelines
   describe MessageValidity do
     let(:em) { mock("eventmachine") }
-    let(:monitoring) { MockMonitoring.new }
-    let(:services) { { monitoring: monitoring } }
+    let(:logging) { MockLogging.new }
+    let(:services) { { logging: logging } }
     let(:test_class) do
       class TestStage < EmPipelines::Stage; end
 
@@ -173,14 +173,14 @@ module EmPipelines
           let(:message) { valid_message }
 
           it "judges validity correctly" do
-            monitoring.should_receive(:debug).any_number_of_times
+            logging.should_receive(:debug).any_number_of_times
 
             test_class.validate!(message, services).should be_true
           end
 
           it "raises no errors" do
-            monitoring.should_not_receive(:error)
-            monitoring.should_receive(:debug).any_number_of_times
+            logging.should_not_receive(:error)
+            logging.should_receive(:debug).any_number_of_times
 
             expect do
               test_class.validate!(message, services)
@@ -192,15 +192,15 @@ module EmPipelines
           let(:message) { invalid_message_one }
 
           it "judges validity correctly" do
-            monitoring.should_receive(:error).once
-            monitoring.should_receive(:debug).any_number_of_times
+            logging.should_receive(:error).once
+            logging.should_receive(:debug).any_number_of_times
 
             test_class.validate!(message, services).should be_false
           end
 
-          it "notifies monitoring of errors for each failing key" do
-            monitoring.should_receive(:error).once
-            monitoring.should_receive(:debug).any_number_of_times
+          it "notifies logging of errors for each failing key" do
+            logging.should_receive(:error).once
+            logging.should_receive(:debug).any_number_of_times
 
             test_class.validate!(message, services)
           end
@@ -210,15 +210,15 @@ module EmPipelines
           let(:message) { invalid_message_two }
 
           it "judges validity correctly" do
-            monitoring.should_receive(:error).twice
-            monitoring.should_receive(:debug).any_number_of_times
+            logging.should_receive(:error).twice
+            logging.should_receive(:debug).any_number_of_times
 
             test_class.validate!(message, services).should be_false
           end
 
-          it "notifies monitoring of errors for each failing key" do
-            monitoring.should_receive(:error).twice
-            monitoring.should_receive(:debug).any_number_of_times
+          it "notifies logging of errors for each failing key" do
+            logging.should_receive(:error).twice
+            logging.should_receive(:debug).any_number_of_times
 
             test_class.validate!(message, services)
           end

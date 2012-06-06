@@ -14,8 +14,8 @@ module EmPipelines
 
   describe AmqpEventSource do
     let (:em) { mock('eventmachine') }
-    let (:monitoring) { mock('monitoring') }
-    let (:services) { { monitoring: monitoring } }
+    let (:logging) { mock('logging') }
+    let (:services) { { logging: logging } }
 
     it 'wraps each AMQP message and send to listeners' do
       json_payload = '{"key":"value"}'
@@ -57,7 +57,7 @@ module EmPipelines
       header = mock('header')
 
       header.should_receive(:reject).with({:requeue => false})
-      services[:monitoring].should_receive(:inform_exception!)
+      services[:logging].should_receive(:inform_exception!)
 
       amqp_source = AmqpEventSource.new(em, queue, 'event type', services)
       amqp_source.on_event { raise 'should never happen' }

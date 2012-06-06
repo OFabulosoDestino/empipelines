@@ -6,8 +6,8 @@ require File.join(File.dirname(__FILE__), "test_stages")
 
 module TestStages
   describe "Consumption of events from a in-memory batch" do
-    let(:monitoring) { TestStages::MockMonitoring.new }
-    let(:services) { { monitoring: monitoring } }
+    let(:logging) { TestStages::MockLogging.new }
+    let(:services) { { logging: logging } }
     let(:processed) { [] }
     let(:timeout) { 1 }
 

@@ -6,8 +6,8 @@ require File.join(File.dirname(__FILE__), "test_stages")
 
 module TestStages
   describe "from AmqpEventSource" do
-    let(:monitoring) { TestStages::MockMonitoring.new }
-    let(:services) { { monitoring: monitoring } }
+    let(:logging) { TestStages::MockLogging.new }
+    let(:services) { { logging: logging } }
     let(:processed) { [] }
     let(:messages) { }
     let(:timeout) { 0.01 }
@@ -35,9 +35,9 @@ module TestStages
       end
 
       it "pipeline executes each stage without errors" do
-        services[:monitoring].should_receive(:debug).any_number_of_times
-        services[:monitoring].should_not_receive(:error)
-        services[:monitoring].should_not_receive(:inform_exception!)
+        services[:logging].should_receive(:debug).any_number_of_times
+        services[:logging].should_not_receive(:error)
+        services[:logging].should_not_receive(:inform_exception!)
 
         expect do
           EM.run do
@@ -71,12 +71,12 @@ module TestStages
         ].map(&:to_json)
       end
 
-      it "pipeline executes each stage, monitoring receives every validation error for every executed stage" do
-        services[:monitoring].should_receive(:inform).any_number_of_times
-        services[:monitoring].should_receive(:debug).any_number_of_times
-        services[:monitoring].should_receive(:error).with(/required keys were not present(.*?):d/).once
-        services[:monitoring].should_receive(:error).with(/values required to be be parsed as Time couldn't be(.*?):b/).once
-        services[:monitoring].should_not_receive(:inform_exception!)
+      it "pipeline executes each stage, logging receives every validation error for every executed stage" do
+        services[:logging].should_receive(:inform).any_number_of_times
+        services[:logging].should_receive(:debug).any_number_of_times
+        services[:logging].should_receive(:error).with(/required keys were not present(.*?):d/).once
+        services[:logging].should_receive(:error).with(/values required to be be parsed as Time couldn't be(.*?):b/).once
+        services[:logging].should_not_receive(:inform_exception!)
 
         EM.run do
           exchange, queue = TestStages.setup_queues

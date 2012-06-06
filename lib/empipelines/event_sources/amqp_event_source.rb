@@ -6,7 +6,7 @@ module EmPipelines
   #this must have a on_finished!
   class AmqpEventSource < EventSource
     # TODO: why is amqp the only EventSource
-    # that needs a `monitoring` on initialize?
+    # that needs a `logging` on initialize?
     def initialize(em, queue, event_name, services)
       @em, @queue, @event_name, @services = em, queue, event_name, services
     end
@@ -25,7 +25,7 @@ module EmPipelines
           message.on_rejected { |m| header.reject(:requeue => true) }
           event!(message)
         rescue => exc
-          @services[:monitoring].inform_exception!(exc, self, 'removing message from queue')
+          @services[:logging].inform_exception!(exc, self, 'removing message from queue')
           header.reject(:requeue => false)
         end
       end

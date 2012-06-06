@@ -88,9 +88,9 @@ module EmPipelines
   end
 
   describe Pipeline do
-    let(:monitoring) { stub(:inform => nil, :debug => nil) }
+    let(:logging) { stub(:inform => nil, :debug => nil) }
     let(:em) { MockEM.new }
-    let(:services) { { :foo => 4, :bar => Object.new, :baz => "a thing!", :monitoring => monitoring } }
+    let(:services) { { :foo => 4, :bar => Object.new, :baz => "a thing!", :logging => logging } }
     let(:stages) { [ AddOne, SquareIt, GlobalHolder ] }
     let(:pipeline) { Pipeline.new(em, services) }
 
@@ -98,7 +98,7 @@ module EmPipelines
       it "sets instance variables, defines attr_accessors" do
         pipeline.em.should ==(em)
         pipeline.services.should ==(services)
-        pipeline.services[:monitoring].should ==(services[:monitoring])
+        pipeline.services[:logging].should ==(services[:logging])
       end
     end
 
@@ -151,7 +151,7 @@ module EmPipelines
 
       it "marks message as broken if uncaught exception" do
         a_msg = msg({})
-        monitoring.should_receive(:inform_exception!)
+        logging.should_receive(:inform_exception!)
 
         a_msg.should_receive(:broken!)
 

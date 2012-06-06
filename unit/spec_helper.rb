@@ -1,5 +1,5 @@
 module EmPipelines
-  class MockMonitoring
+  class MockLogging
     def self.error(text)
       text
     end

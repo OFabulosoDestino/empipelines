@@ -4,8 +4,8 @@ require File.join(File.dirname(__FILE__), 'test_stages')
 
 module TestStages
   describe 'Consumption of events from a file' do
-    let(:monitoring) { TestStages::MockMonitoring.new }
-    let(:services) { { monitoring: monitoring } }
+    let(:logging) { TestStages::MockLogging.new }
+    let(:services) { { logging: logging } }
     let(:processed) { [] }
     let(:timeout) { 0.1 }
 

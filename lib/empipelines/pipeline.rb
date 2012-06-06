@@ -25,23 +25,23 @@ module EmPipelines
 
     def for(stages)
       @stages = stages.map { |stage| instantiate_stage_with_services(stage, services) }
-      monitoring = services[:monitoring]
+      logging = services[:logging]
 
       first_stage_process = @stages.reverse.reduce(TerminatorStage) do |current_head, next_stage|
         @em.spawn do |input_message|
           begin
-            monitoring.debug "#{next_stage.class}#notify with #{input_message}}"
+            logging.debug "#{next_stage.class}#notify with #{input_message}}"
             next_stage.call(input_message) do |output|
               current_head.notify(output)
             end
           rescue => exception # TODO: Really? all of them?
-            monitoring.inform_exception!(exception, next_stage, "Message #{input_message} is broken")
+            logging.inform_exception!(exception, next_stage, "Message #{input_message} is broken")
             input_message.broken!
           end
         end
       end
 
-      monitoring.inform "Pipeline for event_definition is: #{@stages.map(&:class).join('->')}"
+      logging.inform "Pipeline for event_definition is: #{@stages.map(&:class).join('->')}"
       first_stage_process
     end
 

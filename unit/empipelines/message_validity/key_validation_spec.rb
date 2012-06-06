@@ -5,8 +5,8 @@ require "empipelines/message_validity/key_validation"
 module EmPipelines::MessageValidity
   describe KeyValidation do
     let(:em) { mock("eventmachine") }
-    let(:monitoring) { mock("monitoring") }
-    let(:services) { { monitoring: monitoring } }
+    let(:logging) { mock("logging") }
+    let(:services) { { logging: logging } }
 
     shared_examples_for "KeyValidation subclass" do
       context "two KeyValidation objects with identical `class.name`, `keys`, and `in` properties" do

@@ -17,7 +17,7 @@ module TestStages
     [exchange, queue]
   end
 
-  class MockMonitoring
+  class MockLogging
     def initialize(output = false)
       @output = output
     end

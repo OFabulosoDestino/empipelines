@@ -36,10 +36,10 @@ module EmPipelines::MessageValidity
 
   def validate!(message, services)
     failures = []
-    monitoring = services[:monitoring]
+    logging = services[:logging]
 
     validations.each do |validation|
-      monitoring.debug "MessageValidity.validate! running validation: #{validation.class.name}"
+      logging.debug "MessageValidity.validate! running validation: #{validation.class.name}"
 
       proc          = validation.class.proc
       keys          = validation.keys
@@ -63,7 +63,7 @@ module EmPipelines::MessageValidity
       true
     else
       failures.each do |failure|
-        monitoring.error "#{failure[:error_text]}: #{ {failure[:key] => failure[:value]} }"
+        logging.error "#{failure[:error_text]}: #{ {failure[:key] => failure[:value]} }"
       end
       false
     end
@@ -71,7 +71,7 @@ module EmPipelines::MessageValidity
 
   module InstanceInterface
     def validate!(message)
-      self.class.validate!(message, { monitoring: monitoring })
+      self.class.validate!(message, { logging: logging })
     end
   end
 end
