@@ -1,5 +1,5 @@
 module EmPipelines
-  VERSION = '0.3.1'
+  VERSION = '0.3.11'
 end
 
 libdir = File.dirname(__FILE__)
