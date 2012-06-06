@@ -5,7 +5,6 @@ require "json"
 require File.join(File.dirname(__FILE__), "test_stages")
 
 module TestStages
-
   describe "Consumption of events from a in-memory batch" do
     let(:monitoring) { TestStages::MockMonitoring.new }
     let(:services) { { monitoring: monitoring } }
@@ -88,6 +87,5 @@ module TestStages
         event_pipeline.start!
       end
     end
-
   end
 end

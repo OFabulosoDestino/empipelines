@@ -5,7 +5,6 @@ ExchangeName  = "empipelines.build"
 QueueName     = "empipelines.build.queue"
 
 module TestStages
-
   def self.setup_queues(exchange_name=ExchangeName, queue_name=QueueName)
     connection = AMQP.connect()
     channel = AMQP::Channel.new(connection)

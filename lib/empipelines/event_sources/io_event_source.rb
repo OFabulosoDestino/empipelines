@@ -2,7 +2,6 @@ require 'empipelines/event_source'
 
 module EmPipelines
   class IOEventSource < EventSource
-
     def initialize(em, file_path)
       raise "File #{file_path} does not exist!" unless File.exists?(file_path)
       @em, @file_path = em, file_path

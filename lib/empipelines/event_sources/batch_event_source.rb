@@ -2,7 +2,6 @@ require 'empipelines/event_source'
 
 module EmPipelines
   class BatchEventSource < EventSource
-
     def initialize(em, list_name, events)
       @num_finalised = 0
       @em, @list_name, @events = em, list_name, events
@@ -31,7 +30,7 @@ module EmPipelines
       end
     end
 
-    private
+  private
     def check_if_finished
       #TODO: can we make this not be based on size?
       #it makes it harder to have streams as event sources (i.e. ranges).
