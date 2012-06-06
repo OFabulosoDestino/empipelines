@@ -17,6 +17,7 @@ module EmPipelines::MessageValidity
   # TODO: at this point, the 'sugar' of calling `validates_presence_of_keys`
   # probably doesn't justify the complexity this module comes with.
   # More verbose, explicit calls to validators may make more sense.
+  # (Descendent modules are pretty simple, though)
   [ Presence, Numericality, Temporality ].each do |validation|
     send(:define_method, validation.declaration) do |*args|
       # TODO: extract 'in' argument without using `last`
@@ -33,8 +34,9 @@ module EmPipelines::MessageValidity
     end
   end
 
-  def validate!(message, monitoring)
+  def validate!(message, services)
     failures = []
+    monitoring = services[:monitoring]
 
     validations.each do |validation|
       monitoring.debug "MessageValidity.validate! running validation: #{validation.class.name}"
@@ -69,7 +71,7 @@ module EmPipelines::MessageValidity
 
   module InstanceInterface
     def validate!(message)
-      self.class.validate!(message, monitoring)
+      self.class.validate!(message, { monitoring: monitoring })
     end
   end
 end

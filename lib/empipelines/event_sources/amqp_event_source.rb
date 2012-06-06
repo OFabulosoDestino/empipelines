@@ -5,9 +5,10 @@ require 'json'
 module EmPipelines
   #this must have a on_finished!
   class AmqpEventSource < EventSource
-
-    def initialize(em, queue, event_name, monitoring)
-      @em, @queue, @event_name, @monitoring = em, queue, event_name, monitoring
+    # TODO: why is amqp the only EventSource
+    # that needs a `monitoring` on initialize?
+    def initialize(em, queue, event_name, services)
+      @em, @queue, @event_name, @services = em, queue, event_name, services
     end
 
     def start!
@@ -24,7 +25,7 @@ module EmPipelines
           message.on_rejected { |m| header.reject(:requeue => true) }
           event!(message)
         rescue => exc
-          @monitoring.inform_exception!(exc, self, 'removing message from queue')
+          @services[:monitoring].inform_exception!(exc, self, 'removing message from queue')
           header.reject(:requeue => false)
         end
       end

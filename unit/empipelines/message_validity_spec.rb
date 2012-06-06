@@ -1,24 +1,13 @@
 require 'empipelines'
+require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
 module EmPipelines
   describe MessageValidity do
     let(:em) { mock("eventmachine") }
-    let(:monitoring) { mock("monitoring") }
+    let(:monitoring) { MockMonitoring.new }
+    let(:services) { { monitoring: monitoring } }
     let(:test_class) do
-      class TestStage < EmPipelines::Stage
-        class FakeMonitoring
-          def self.error(text)
-            text
-          end
-          def self.debug(text)
-            text
-          end
-        end
-
-        def initialize(services={})
-          super({ :monitoring => FakeMonitoring.new }.merge(services))
-        end
-      end
+      class TestStage < EmPipelines::Stage; end
 
       TestStage
     end
@@ -44,14 +33,14 @@ module EmPipelines
     context "#initialize" do
       it "doesn't throw an error" do
         expect do
-          test_class.new
+          test_class.new(services)
         end.to_not raise_error
       end
 
       it "calls super" do
         EmPipelines::Stage.should_receive(:new)
 
-        test_class.new
+        test_class.new(services)
       end
     end
 
@@ -186,7 +175,7 @@ module EmPipelines
           it "judges validity correctly" do
             monitoring.should_receive(:debug).any_number_of_times
 
-            test_class.validate!(message, monitoring).should be_true
+            test_class.validate!(message, services).should be_true
           end
 
           it "raises no errors" do
@@ -194,7 +183,7 @@ module EmPipelines
             monitoring.should_receive(:debug).any_number_of_times
 
             expect do
-              test_class.validate!(message, monitoring)
+              test_class.validate!(message, services)
             end.to_not raise_error
           end
         end
@@ -206,14 +195,14 @@ module EmPipelines
             monitoring.should_receive(:error).once
             monitoring.should_receive(:debug).any_number_of_times
 
-            test_class.validate!(message, monitoring).should be_false
+            test_class.validate!(message, services).should be_false
           end
 
           it "notifies monitoring of errors for each failing key" do
             monitoring.should_receive(:error).once
             monitoring.should_receive(:debug).any_number_of_times
 
-            test_class.validate!(message, monitoring)
+            test_class.validate!(message, services)
           end
         end
 
@@ -224,14 +213,14 @@ module EmPipelines
             monitoring.should_receive(:error).twice
             monitoring.should_receive(:debug).any_number_of_times
 
-            test_class.validate!(message, monitoring).should be_false
+            test_class.validate!(message, services).should be_false
           end
 
           it "notifies monitoring of errors for each failing key" do
             monitoring.should_receive(:error).twice
             monitoring.should_receive(:debug).any_number_of_times
 
-            test_class.validate!(message, monitoring)
+            test_class.validate!(message, services)
           end
         end
       end

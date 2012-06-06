@@ -7,6 +7,7 @@ require File.join(File.dirname(__FILE__), "test_stages")
 module TestStages
   describe "from AmqpEventSource" do
     let(:monitoring) { TestStages::MockMonitoring.new }
+    let(:services) { { monitoring: monitoring } }
     let(:processed) { [] }
     let(:messages) { }
     let(:timeout) { 0.01 }
@@ -34,18 +35,18 @@ module TestStages
       end
 
       it "pipeline executes each stage without errors" do
-        monitoring.should_receive(:debug).any_number_of_times
-        monitoring.should_not_receive(:error)
-        monitoring.should_not_receive(:inform_exception!)
+        services[:monitoring].should_receive(:debug).any_number_of_times
+        services[:monitoring].should_not_receive(:error)
+        services[:monitoring].should_not_receive(:inform_exception!)
 
         expect do
           EM.run do
             exchange, queue = TestStages.setup_queues
             messages.each { |m| exchange.publish(m, :rounting_key => "empipelines.build.queue") }
-            pipeline = EmPipelines::Pipeline.new(EM, { :processed => processed }, monitoring)
-            source = EmPipelines::AmqpEventSource.new(EM, queue, 'msg', monitoring)
+            pipeline = EmPipelines::Pipeline.new(EM, services.merge({ :processed => processed }) )
+            source = EmPipelines::AmqpEventSource.new(EM, queue, 'msg', services)
             stages = [ TestStages::ValidatesPresenceStage ]
-            event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), monitoring)
+            event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), services)
 
             EM.add_timer(timeout) do
               EM.stop
@@ -71,18 +72,18 @@ module TestStages
       end
 
       it "pipeline executes each stage, monitoring receives every validation error for every executed stage" do
-        monitoring.should_receive(:inform).any_number_of_times
-        monitoring.should_receive(:debug).any_number_of_times
-        monitoring.should_receive(:error).with(/required keys were not present(.*?):d/).once
-        monitoring.should_receive(:error).with(/values required to be be parsed as Time couldn't be(.*?):b/).once
-        monitoring.should_not_receive(:inform_exception!)
+        services[:monitoring].should_receive(:inform).any_number_of_times
+        services[:monitoring].should_receive(:debug).any_number_of_times
+        services[:monitoring].should_receive(:error).with(/required keys were not present(.*?):d/).once
+        services[:monitoring].should_receive(:error).with(/values required to be be parsed as Time couldn't be(.*?):b/).once
+        services[:monitoring].should_not_receive(:inform_exception!)
 
         EM.run do
           exchange, queue = TestStages.setup_queues
-          pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring)
-          source = EmPipelines::AmqpEventSource.new(EM, queue, 'msg', monitoring)
+          pipeline = EmPipelines::Pipeline.new(EM, services.merge({ :processed => processed }) )
+          source = EmPipelines::AmqpEventSource.new(EM, queue, 'msg', services)
           stages = [ TestStages::ValidatesNumericalityStage, TestStages::ValidatesNumericalityStage, TestStages::ValidatesTemporalityStage, TestStages::ValidatesPresenceStage ]
-          event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), monitoring)
+          event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), services)
 
           messages.each { |m| exchange.publish(m, :rounting_key => "empipelines.build.queue") }
 

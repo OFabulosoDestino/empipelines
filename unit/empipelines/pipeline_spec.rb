@@ -90,15 +90,15 @@ module EmPipelines
   describe Pipeline do
     let(:monitoring) { stub(:inform => nil, :debug => nil) }
     let(:em) { MockEM.new }
-    let(:services) { { :foo => 4, :bar => Object.new, :baz => "a thing!" } }
+    let(:services) { { :foo => 4, :bar => Object.new, :baz => "a thing!", :monitoring => monitoring } }
     let(:stages) { [ AddOne, SquareIt, GlobalHolder ] }
-    let(:pipeline) { Pipeline.new(em, services, monitoring) }
+    let(:pipeline) { Pipeline.new(em, services) }
 
     context "#initialize" do
       it "sets instance variables, defines attr_accessors" do
         pipeline.em.should ==(em)
-        pipeline.monitoring.should ==(monitoring)
         pipeline.services.should ==(services)
+        pipeline.services[:monitoring].should ==(services[:monitoring])
       end
     end
 
@@ -127,7 +127,7 @@ module EmPipelines
         let(:stages) { [ AddOne, SquareIt, GlobalHolder ] << EnsureNotNil }
 
         it "should instantiate the Validation Stage properly" do
-          pipeline = Pipeline.new(em, services, monitoring)
+          pipeline = Pipeline.new(em, services)
           pipeline.for(stages)
 
           stage = pipeline.stages.find { |s| EnsureNotNil === s }
@@ -144,7 +144,7 @@ module EmPipelines
         GlobalHolder.should_not_receive(:call)
 
         stages = [AddOne, SquareIt, DeadEnd, GlobalHolder]
-        pipelines = Pipeline.new(em, {:bar => 123}, monitoring)
+        pipelines = Pipeline.new(em, services)
         pipeline = pipelines.for(stages)
         pipeline.notify(msg({:data => 1}))
       end
@@ -155,13 +155,13 @@ module EmPipelines
 
         a_msg.should_receive(:broken!)
 
-        pipeline = Pipeline.new(em, {}, monitoring)
+        pipeline = Pipeline.new(em, services)
         pipeline.for([BrokenStage]).notify(a_msg)
       end
 
       it "flags the message as consumed if it goes through all stages" do
         stages = [Passthrough, AddOne, Passthrough, SquareIt, Passthrough]
-        pipelines = Pipeline.new(em, {}, monitoring)
+        pipelines = Pipeline.new(em, services)
         pipeline = pipelines.for(stages)
         a_msg = msg({:data => 1})
         a_msg.should_receive(:consumed!)

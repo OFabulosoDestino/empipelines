@@ -6,6 +6,7 @@ module EmPipelines::MessageValidity
   describe KeyValidation do
     let(:em) { mock("eventmachine") }
     let(:monitoring) { mock("monitoring") }
+    let(:services) { { monitoring: monitoring } }
 
     shared_examples_for "KeyValidation subclass" do
       context "two KeyValidation objects with identical `class.name`, `keys`, and `in` properties" do

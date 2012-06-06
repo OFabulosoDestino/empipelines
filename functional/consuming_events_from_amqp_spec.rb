@@ -8,6 +8,7 @@ module TestStages
 
   describe "Consumption of events from a in-memory batch" do
     let(:monitoring) { TestStages::MockMonitoring.new }
+    let(:services) { { monitoring: monitoring } }
     let(:processed) { [] }
     let(:timeout) { 1 }
 
@@ -20,11 +21,11 @@ module TestStages
         messages = (1..1000).map { |i| {:data => i}.to_json }
         messages.each { |m| exchange.publish(m, :rounting_key => QueueName) }
 
-        pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring)
-        source = EmPipelines::AmqpEventSource.new(EM, queue, "msg", monitoring)
+        pipeline = EmPipelines::Pipeline.new(EM, services.merge({ :processed => processed }))
+        source = EmPipelines::AmqpEventSource.new(EM, queue, "msg", services)
 
         stages = [TestStages::PassthroughStage, TestStages::PassthroughStage, TestStages::PassthroughStage]
-        event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), monitoring)
+        event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), services)
 
         pipeline.stages.size.should ==(stages.size)
 
@@ -45,11 +46,11 @@ module TestStages
         messages = (1..1000).map { |i| {:data => i}.to_json }
         messages.each { |m| exchange.publish(m, :rounting_key => QueueName) }
 
-        pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring)
-        source = EmPipelines::AmqpEventSource.new(EM, queue, "msg", monitoring)
+        pipeline = EmPipelines::Pipeline.new(EM, services.merge({ :processed => processed }))
+        source = EmPipelines::AmqpEventSource.new(EM, queue, "msg", services)
 
         stages = [TestStages::BrokenMessageStage, TestStages::ShouldNotBeReachedStage]
-        event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), monitoring)
+        event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), services)
 
         pipeline.stages.size.should ==(stages.size)
 
@@ -70,11 +71,11 @@ module TestStages
         messages = [ {:data => "b"}.to_json ]
         messages.each { |m| exchange.publish(m, :rounting_key => QueueName) }
 
-        pipeline = EmPipelines::Pipeline.new(EM, {:processed => processed}, monitoring)
-        source = EmPipelines::AmqpEventSource.new(EM, queue, "msg", monitoring)
+        pipeline = EmPipelines::Pipeline.new(EM, services.merge({ :processed => processed }))
+        source = EmPipelines::AmqpEventSource.new(EM, queue, "msg", services)
 
         stages = [TestStages::RetryOscillator]
-        event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), monitoring)
+        event_pipeline = EmPipelines::EventPipeline.new(source, pipeline.for(stages), services)
 
         pipeline.stages.size.should ==(stages.size)
 

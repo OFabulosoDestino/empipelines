@@ -17,14 +17,14 @@ module EmPipelines
 
   describe EventPipeline do
     it "binds a source to a pipeline" do
-      monitoring = stub(:increment => nil)
+      monitoring = stub('monitoring')
       event = stub('event')
       pipeline = stub('processing pipeline')
       source = StubSource.new(event)
-
+      services = { monitoring: monitoring }
       pipeline.should_receive(:notify).with(event)
 
-      event_pipeline = EventPipeline.new(source, pipeline, monitoring)
+      event_pipeline = EventPipeline.new(source, pipeline, services)
       event_pipeline.start!
     end
   end
