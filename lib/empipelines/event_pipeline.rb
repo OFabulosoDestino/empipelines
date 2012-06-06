@@ -1,5 +1,7 @@
 module EmPipelines
   class EventPipeline
+    # TODO: what is the difference/relationship
+    # between an EventPipeline and a Pipeline?
     def initialize(source, pipeline, monitoring)
       @source, @pipeline, @monitoring = source, pipeline, monitoring
 
