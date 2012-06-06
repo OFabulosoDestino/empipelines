@@ -1,6 +1,5 @@
 require "amqp"
-require "empipelines/message_validity"
-require "empipelines/stage"
+require "empipelines"
 
 ExchangeName  = "empipelines.build"
 QueueName     = "empipelines.build.queue"

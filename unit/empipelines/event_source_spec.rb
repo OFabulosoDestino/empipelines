@@ -1,4 +1,4 @@
-require 'empipelines/event_source'
+require 'empipelines'
 
 module EmPipelines
   class StubEventSource < EventSource

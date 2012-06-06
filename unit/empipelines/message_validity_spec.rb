@@ -1,7 +1,4 @@
-require "empipelines/message"
-require "empipelines/stage"
-require "empipelines/message_validity"
-require "empipelines/message_validity/key_validations/presence"
+require 'empipelines'
 
 module EmPipelines
   describe MessageValidity do

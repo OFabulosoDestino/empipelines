@@ -1,4 +1,3 @@
-require 'empipelines/message'
 require 'empipelines/event_source'
 
 module EmPipelines

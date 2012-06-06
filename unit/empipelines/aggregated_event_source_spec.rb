@@ -1,4 +1,4 @@
-require 'empipelines/aggregated_event_source'
+require 'empipelines'
 
 module EmPipelines
   class EventSourceStub < EventSource

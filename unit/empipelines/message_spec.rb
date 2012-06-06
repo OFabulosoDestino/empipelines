@@ -1,4 +1,4 @@
-require 'empipelines/message'
+require 'empipelines'
 
 module EmPipelines
   describe Message do

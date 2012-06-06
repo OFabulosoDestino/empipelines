@@ -1,5 +1,4 @@
 require 'empipelines/event_source'
-require 'empipelines/message'
 
 require 'json'
 

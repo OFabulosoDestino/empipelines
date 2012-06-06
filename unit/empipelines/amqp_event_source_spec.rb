@@ -1,4 +1,4 @@
-require 'empipelines/amqp_event_source'
+require 'empipelines'
 
 module EmPipelines
   class StubQueue
@@ -61,10 +61,10 @@ module EmPipelines
       amqp_source = AmqpEventSource.new(em, queue, 'event type', monitoring)
       amqp_source.on_event { raise 'should never happen' }
       amqp_source.start!
-  
+
       queue.publish(header, 'some junk')
     end
-    
+
     it 'rejects broken messages with no requeue' do
       queue = StubQueue.new
       header = mock('header')

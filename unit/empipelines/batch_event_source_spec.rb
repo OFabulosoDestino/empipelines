@@ -1,4 +1,4 @@
-require 'empipelines/batch_event_source'
+require 'empipelines'
 
 module EmPipelines
   ShouldNotBeCalled = lambda { |*x| raise 'should not be called' }

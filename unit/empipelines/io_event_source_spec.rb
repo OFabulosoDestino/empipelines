@@ -1,8 +1,7 @@
-require 'empipelines/io_event_source'
-require 'empipelines/batch_event_source'
+require 'empipelines'
 
 module EmPipelines
-  describe IOEventSource do    
+  describe IOEventSource do
     let(:events_file) { File.join(File.dirname(__FILE__), 'io_event_source.dat')}
     let(:empty_file) { File.join(File.dirname(__FILE__), 'empty_io_event_source.dat')}
     let(:inexistent_file) { File.join(File.dirname(__FILE__), 'not_really_son.dat')}
@@ -15,7 +14,7 @@ module EmPipelines
     it 'verifies file existance'  do
       lambda{ IOEventSource.new(em, inexistent_file) }.should raise_error
     end
-    
+
     it 'sends each line in the file as a message to listeners' do
       source = IOEventSource.new(em, events_file)
 
@@ -30,7 +29,7 @@ module EmPipelines
       received.each{ |i| i[:origin].should == events_file }
     end
 
-    
+
     it 'calls the finished callback when all messages were processed' do
       source = IOEventSource.new(em, events_file)
 
@@ -49,7 +48,7 @@ module EmPipelines
 
       has_finished.first.should be_true
     end
-    
+
     it 'finishes immediately if there are no events to process' do
       source = IOEventSource.new(em, empty_file)
 
@@ -67,7 +66,7 @@ module EmPipelines
 
       has_finished.first.should be_true
     end
-    
+
     it 'only calls the finished handler if all events were processed' do
       source = IOEventSource.new(em, events_file)
 

@@ -1,8 +1,4 @@
-require "empipelines/message"
-require "empipelines/pipeline"
-require "empipelines/stage"
-require "empipelines/message_validity"
-require "empipelines/message_validity/key_validations/presence"
+require 'empipelines'
 
 def msg(some_map)
   EmPipelines:: MessageMock.new(some_map)
