@@ -6,7 +6,7 @@ require File.join(File.dirname(__FILE__), "test_stages")
 
 module TestStages
   describe "from AmqpEventSource" do
-    let(:monitoring) { MockMonitoring.new }
+    let(:monitoring) { TestStages::MockMonitoring.new }
     let(:processed) { [] }
     let(:messages) { }
     let(:timeout) { 0.01 }
