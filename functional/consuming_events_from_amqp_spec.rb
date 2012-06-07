@@ -9,7 +9,7 @@ module TestStages
     let(:logging) { mock_logging }
     let(:services) { { logging: logging } }
     let(:processed) { [] }
-    let(:timeout) { 1 }
+    let(:timeout) { 2 }
 
     include EmRunner
 
