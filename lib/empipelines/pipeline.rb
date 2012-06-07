@@ -35,15 +35,13 @@ module EmPipelines
 
       services[:logging].info "Pipeline: #{stages.map(&:class).join('->')}"
 
-      monitoring_with_bindings = ->(message, stage) { monitor_state(message, stage) }
-      propagation_with_bindings = ->(message, head, stage) { propagate_or_halt(message, head, stage) }
+      bound_monitoring_phase = ->(message, stage) { monitor_state(message, stage) }
+      bound_propagation_phase = ->(message, head, stage) { propagate_or_halt(message, head, stage) }
 
       stages.reverse.reduce(TerminatorStage) do |current_head, next_stage|
         @em.spawn do |input_message|
-          # monitor_state(input_message, next_stage)
-          # propagate_or_halt(input_message, current_head, next_stage)
-          monitoring_with_bindings[input_message, next_stage]
-          propagation_with_bindings[input_message, current_head, next_stage]
+          bound_monitoring_phase[input_message, next_stage]
+          bound_propagation_phase[input_message, current_head, next_stage]
         end
       end
     end
