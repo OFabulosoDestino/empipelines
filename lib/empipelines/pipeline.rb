@@ -35,7 +35,7 @@ module EmPipelines
               current_head.notify(output)
             end
           rescue => exception # TODO: Really? all of them?
-            logging.error("Message #{input_message} is broken. Next stage: #{next_stage}, exception: #{exception.inspect}")
+            logging.error("#{exception.inspect} | #{exception.backtrace} | Message marked as broken. next stage: #{next_stage}, message: #{input_message}")
             input_message.broken!
           end
         end
