@@ -88,7 +88,7 @@ module EmPipelines
   end
 
   describe Pipeline do
-    let(:logging) { stub(:inform => nil, :debug => nil) }
+    let(:logging) { mock_logging(false) }
     let(:em) { MockEM.new }
     let(:services) { { :foo => 4, :bar => Object.new, :baz => "a thing!", :logging => logging } }
     let(:stages) { [ AddOne, SquareIt, GlobalHolder ] }
@@ -151,7 +151,7 @@ module EmPipelines
 
       it "marks message as broken if uncaught exception" do
         a_msg = msg({})
-        logging.should_receive(:inform_exception!)
+        logging.should_receive(:error)
 
         a_msg.should_receive(:broken!)
 

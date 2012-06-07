@@ -1,5 +1,7 @@
 require "amqp"
 require "empipelines"
+require "devnull"
+require "spec_helper"
 
 ExchangeName  = "empipelines.build"
 QueueName     = "empipelines.build.queue"
@@ -15,28 +17,6 @@ module TestStages
     queue.bind(exchange)
     queue.purge
     [exchange, queue]
-  end
-
-  class MockLogging
-    def initialize(output = false)
-      @output = output
-    end
-
-    def inform(txt)
-      puts "#{Time.now.usec}  INFO: #{txt}" if @output
-    end
-
-    def debug(txt)
-      puts "#{Time.now.usec} DEBUG: #{txt}" if @output
-    end
-
-    def inform_error!(err)
-      puts "#{err}" if @output
-    end
-
-    def inform_exception!(exc, origin, extra = nil)
-      puts "#{Time.now.usec} ERROR: #{exc} at #{origin} - #{extra}" if @output
-    end
   end
 
   module EmRunner

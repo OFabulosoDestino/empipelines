@@ -2,11 +2,12 @@
 require "eventmachine"
 require "empipelines"
 require "json"
+require "spec_helper"
 require File.join(File.dirname(__FILE__), "test_stages")
 
 module TestStages
   describe "from AmqpEventSource" do
-    let(:logging) { TestStages::MockLogging.new }
+    let(:logging) { mock_logging }
     let(:services) { { logging: logging } }
     let(:processed) { [] }
     let(:messages) { }
@@ -37,7 +38,6 @@ module TestStages
       it "pipeline executes each stage without errors" do
         services[:logging].should_receive(:debug).any_number_of_times
         services[:logging].should_not_receive(:error)
-        services[:logging].should_not_receive(:inform_exception!)
 
         expect do
           EM.run do
@@ -72,11 +72,10 @@ module TestStages
       end
 
       it "pipeline executes each stage, logging receives every validation error for every executed stage" do
-        services[:logging].should_receive(:inform).any_number_of_times
+        services[:logging].should_receive(:info).any_number_of_times
         services[:logging].should_receive(:debug).any_number_of_times
         services[:logging].should_receive(:error).with(/required keys were not present(.*?):d/).once
         services[:logging].should_receive(:error).with(/values required to be be parsed as Time couldn't be(.*?):b/).once
-        services[:logging].should_not_receive(:inform_exception!)
 
         EM.run do
           exchange, queue = TestStages.setup_queues

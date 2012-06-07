@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   ## Leave these as is they will be modified for you by the rake gemspec task.
   s.name              = 'empipelines'
   s.version           = '0.3.11'
-  s.date              = '2012-06-06'
+  s.date              = '2012-06-07'
   s.rubyforge_project = 'empipelines'
 
   s.summary           = "Simple Event Handling Pipeline Architecture for EventMachine"
@@ -70,9 +70,6 @@ Gem::Specification.new do |s|
     unit/empipelines/event_sources/periodic_event_source_spec.rb
     unit/empipelines/message_spec.rb
     unit/empipelines/message_validity/key_validation_spec.rb
-    unit/empipelines/message_validity/key_validations/numericality_spec.rb
-    unit/empipelines/message_validity/key_validations/presence_spec.rb
-    unit/empipelines/message_validity/key_validations/temporality_spec.rb
     unit/empipelines/message_validity_spec.rb
     unit/empipelines/pipeline_spec.rb
     unit/spec_helper.rb

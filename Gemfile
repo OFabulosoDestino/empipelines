@@ -7,10 +7,10 @@ gem 'em-http-request'
 gem 'amqp'
 gem 'activesupport'
 
-group :cucumber do
-  gem 'activesupport'
+group :test do
+  gem 'rspec'
   gem 'sinatra'
   gem 'cucumber'
-  gem 'rspec'
   gem 'bunny'
+  gem 'devnull'
 end

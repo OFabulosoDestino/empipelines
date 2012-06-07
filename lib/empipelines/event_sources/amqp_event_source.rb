@@ -25,7 +25,7 @@ module EmPipelines
           message.on_rejected { |m| header.reject(:requeue => true) }
           event!(message)
         rescue => exc
-          @services[:logging].inform_exception!(exc, self, 'removing message from queue')
+          @services[:logging].error("Removing message from queue. Exception: #{exc}, self: #{self}")
           header.reject(:requeue => false)
         end
       end

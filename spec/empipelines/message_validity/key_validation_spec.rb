@@ -1,9 +1,10 @@
 require "empipelines"
+require "spec_helper"
 
 module EmPipelines::MessageValidity
   describe KeyValidation do
     let(:em) { mock("eventmachine") }
-    let(:logging) { mock("logging") }
+    let(:logging) { mock_logging }
     let(:services) { { logging: logging } }
 
     shared_examples_for "KeyValidation subclass" do

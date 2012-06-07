@@ -35,13 +35,13 @@ module EmPipelines
               current_head.notify(output)
             end
           rescue => exception # TODO: Really? all of them?
-            logging.inform_exception!(exception, next_stage, "Message #{input_message} is broken")
+            logging.error("Message #{input_message} is broken. Next stage: #{next_stage}, exception: #{exception.inspect}")
             input_message.broken!
           end
         end
       end
 
-      logging.inform "Pipeline for event_definition is: #{@stages.map(&:class).join('->')}"
+      logging.info "Pipeline for event_definition is: #{@stages.map(&:class).join('->')}"
       first_stage_process
     end
 

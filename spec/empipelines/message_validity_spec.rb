@@ -1,10 +1,10 @@
 require "empipelines"
-require File.join(File.dirname(__FILE__), "..", "spec_helper")
+require "spec_helper"
 
 module EmPipelines
   describe MessageValidity do
     let(:em) { mock("eventmachine") }
-    let(:logging) { MockLogging.new }
+    let(:logging) { mock_logging }
     let(:services) { { logging: logging } }
     let(:test_class) do
       class TestStage < EmPipelines::Stage; end

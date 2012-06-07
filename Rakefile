@@ -2,6 +2,7 @@ $:.unshift(File.dirname(__FILE__) + '/../lib')
 
 require 'cucumber/rake/task'
 require 'rubygems'
+require 'bundler'
 require 'rake'
 require 'date'
 
@@ -59,20 +60,20 @@ Cucumber::Rake::Task.new(:all_features) do |t|
   t.cucumber_opts = "--format pretty"
 end
 
-def spec(dir)
-  sh "rspec #{dir}"
+def test(dir)
+  Bundler.require(:test, ENV["RUNTIME"] || "development") if defined?(Bundler)
+  sh "bundle exec rspec #{dir}"
 end
 
 desc "Runs unit tests"
 task :unit do
-  spec('unit')
+  test('spec')
 end
 
 desc "Run functional tests"
 task :functional do
-  spec('functional')
+  test('functional')
 end
-
 
 desc "Resets localhost's rabbitmq"
 task :reset_rabbitmq do
