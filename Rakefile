@@ -61,10 +61,11 @@ end
 
 desc "Resets localhost's rabbitmq"
 task :reset_rabbitmq do
-  # if (sh 'ps aux | grep rabbitmq | grep -v grep')
-  sh 'rabbitmqctl stop_app; echo 0'
-  sh 'rabbitmqctl reset; echo 0'
-  sh 'rabbitmqctl start_app'
+  # sh 'ps aux | grep rabbitmq | grep -v grep')
+  # sh 'rabbitmqctl stop_app; echo 0'
+  # sh 'rabbitmqctl reset; echo 0'
+  # sh 'rabbitmqctl start_app'
+  sh 'rabbitmq-server'
 end
 
 def spec(dir)
@@ -81,14 +82,13 @@ end
 desc "Run functional tests"
 task :functional do
   # Rake::Task['reset_rabbitmq'].invoke
-
   spec('functional')
 end
 
 task :ci => [:unit, :functional, :build]
 
 desc "MUST BE RUN (AND PASS!) BEFORE CHECKING IN CODE!"
-task :pre_checkin => [:reset_rabbitmq, :ci]
+task :pre_checkin => [:ci]
 
 #############################################################################
 #
