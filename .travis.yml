@@ -1,4 +1,3 @@
 language: ruby
 rvm: 1.9.3
-before_script:
-  - "rabbitmq-server"
+before_script: ./script/ci/before_script.sh
