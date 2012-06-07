@@ -74,8 +74,9 @@ module TestStages
       it "pipeline executes each stage, logging receives every validation error for every executed stage" do
         services[:logging].should_receive(:info).any_number_of_times
         services[:logging].should_receive(:debug).any_number_of_times
-        services[:logging].should_receive(:error).with(/required keys were not present(.*?):d/).once
         services[:logging].should_receive(:error).with(/values required to be be parsed as Time couldn't be(.*?):b/).once
+        services[:logging].should_not_receive(:error).with(/required keys were not present(.*?):d/)
+        after_invalid_stage = 1
 
         EM.run do
           exchange, queue = TestStages.setup_queues
@@ -89,7 +90,7 @@ module TestStages
           # TODO: run without relying on a fixed amount of time
           EM.add_timer(timeout) do
             EM.stop
-            processed.size.should ==(stages.size * messages.size)
+            processed.size.should ==((stages.size - after_invalid_stage) * messages.size)
           end
 
           event_pipeline.start!

@@ -5,7 +5,7 @@ def msg(some_map)
 end
 
 module EmPipelines
-  class MessageMock < EmPipelines::Message
+  class MessageMock < Message
     def consumed!
       raise "consumed! should not have been called"
     end
@@ -19,56 +19,53 @@ module EmPipelines
     end
   end
 
-  class Passthrough < EmPipelines::Stage
+  class Passthrough < Stage
   end
 
-  class EnsureNotNil < EmPipelines::Stage
+  class EnsureNotNil < Stage
     extend EmPipelines::MessageValidity
 
     validates_presence_of_keys :a
 
-    def call(input, &next_stage)
-      validate!(input) && next_stage.call(input)
+    def call(message, &callback)
+      validate!(message) && callback.call(message)
     end
   end
 
-  class AddOne < EmPipelines::Stage
-    def call(input, &next_stage)
-      next_stage.call(input.merge!({:data => (input[:data] + 1)}))
+  class AddOne < Stage
+    def call(message, &callback)
+      callback.call(message.merge!({:data => (message[:data] + 1)}))
     end
   end
 
-  class SquareIt < EmPipelines::Stage
-    def call(input, &next_stage)
-      next_stage.call(input.merge!({:data => (input[:data] * input[:data])}))
+  class SquareIt < Stage
+    def call(message, &callback)
+      callback.call(message.merge!({:data => (message[:data] * message[:data])}))
     end
   end
 
-  class BrokenStage < EmPipelines::Stage
-    def call(ignore, &ignored_too)
+  class BrokenStage < Stage
+    def call(message, &callback)
+      message.broken!
+    end
+  end
+
+  class ExceptionStage < Stage
+    def call(message, &callback)
       raise "Boo!"
     end
   end
 
-  class DeadEnd < EmPipelines::Stage
-    def call(input, &also_ignore)
-      #noop
+  class NeedsAnApple < Stage
+    def call(message, &callback)
+      callback.call(message.merge!({:apple => apple}))
     end
   end
 
-  class NeedsAnApple < EmPipelines::Stage
-    def call(input, &next_stage)
-      next_stage.call(input.merge!({:apple => apple}))
+  class NeedsAnOrange < Stage
+    def call(message, &callback)
+      callback.call(message.merge!({:orange => orange}))
     end
-  end
-
-  class NeedsAnOrange < EmPipelines::Stage
-    def call(input, &next_stage)
-      next_stage.call(input.merge!({:orange => orange}))
-    end
-  end
-
-  class GlobalHolder < EmPipelines::Stage
   end
 
   class MockEM
@@ -91,14 +88,14 @@ module EmPipelines
     let(:logging) { mock_logging(false) }
     let(:em) { MockEM.new }
     let(:services) { { :foo => 4, :bar => Object.new, :baz => "a thing!", :logging => logging } }
-    let(:stages) { [ AddOne, SquareIt, GlobalHolder ] }
+    let(:stages) { [ AddOne, SquareIt, Passthrough ] }
     let(:pipeline) { Pipeline.new(em, services) }
 
     context "#initialize" do
       it "sets instance variables, defines attr_accessors" do
         pipeline.em.should ==(em)
         pipeline.services.should ==(services)
-        pipeline.services[:logging].should ==(services[:logging])
+        pipeline.services[:logging].should ==(logging)
       end
     end
 
@@ -123,13 +120,82 @@ module EmPipelines
             end
       end
 
+      context "inter-stage behavior" do
+        let(:pipeline) { Pipeline.new(em, services, stages) }
+        let(:message) { MessageMock.new({:a => "b"}) }
+        let(:prev_stage) { stages[0] }
+        let(:next_stage) { stages[1] }
+
+        before { message.instance_variable_set("@state", state) }
+
+        shared_examples_for "a message in halting state" do
+          it ": doesnt propagate the message and informs monitoring of state and pipeline stop" do
+            stages.each{ |stage| stage.should_not_receive(:call) }
+            pipeline.services[:logging].should_receive(:info).with("Pipeline: stopping propagation.")
+            pipeline.services[:logging].should_receive(severity)
+            pipeline.services[:logging].should respond_to(:info)
+
+            pipeline.send(:monitor_state, message, next_stage)
+            pipeline.send(:propagate_or_halt, message, prev_stage, next_stage)
+          end
+        end
+
+        shared_examples_for "a message in propagating state" do
+          it ": propagates the message and informs monitoring correctly" do
+            next_stage.should_receive(:call)
+            (stages - [next_stage]).map { |stage| stage.should_not_receive(:call) }
+            pipeline.services[:logging].should_receive(severity).with(/#{state.to_s}/)
+            pipeline.services[:logging].should respond_to(:info)
+
+            pipeline.send(:monitor_state, message, next_stage)
+            pipeline.send(:propagate_or_halt, message, prev_stage, next_stage)
+          end
+        end
+
+        context "with message state" do
+          context "broken" do
+            let(:state) { :broken }
+            let(:severity) { :error }
+
+            it_should_behave_like "a message in halting state"
+          end
+
+          context "rejected" do
+            let(:state) { :rejected }
+            let(:severity) { :error }
+
+            it_should_behave_like "a message in halting state"
+          end
+
+          context "consumed" do
+            let(:state) { :consumed }
+            let(:severity) { :info }
+
+            it_should_behave_like "a message in halting state"
+          end
+
+          context "created" do
+            let(:state) { :created }
+            let(:severity) { :info }
+
+            it_should_behave_like "a message in propagating state"
+          end
+
+          context "other" do
+            let(:state) { :haaaaaiiiiiii }
+            let(:severity) { :warn }
+
+            it_should_behave_like "a message in propagating state"
+          end
+        end
+      end
+
       context "with a Validation Stage" do
-        let(:stages) { [ AddOne, SquareIt, GlobalHolder ] << EnsureNotNil }
+        let(:stages) { [ AddOne, SquareIt, Passthrough, EnsureNotNil ] }
+        let(:pipeline) { Pipeline.new(em, services) }
 
         it "should instantiate the Validation Stage properly" do
-          pipeline = Pipeline.new(em, services)
           pipeline.for(stages)
-
           stage = pipeline.stages.find { |s| EnsureNotNil === s }
 
           stage.should_not be_nil
@@ -140,33 +206,31 @@ module EmPipelines
     end
 
     context "#notify" do
-      it "does not call the next if last returned nil" do
-        GlobalHolder.should_not_receive(:call)
+      let(:stages) { [ AddOne, Passthrough, BrokenStage, SquareIt ] }
+      let(:pipeline) { Pipeline.new(em, services, stages) }
+      let(:message) { Message.new({:data => 1}) }
 
-        stages = [AddOne, SquareIt, DeadEnd, GlobalHolder]
-        pipelines = Pipeline.new(em, services)
-        pipeline = pipelines.for(stages)
-        pipeline.notify(msg({:data => 1}))
+      it "does not call the next if last returned nil" do
+        pipeline.stages.first.should_receive(:call)
+        pipeline.stages.last.should_not_receive(:call)
+
+        pipeline.for.notify(message)
       end
 
-      it "marks message as broken if uncaught exception" do
-        a_msg = msg({})
-        logging.should_receive(:error)
+      it "raises uncaught exceptions thrown within stages" do
+        expect do
+          pipeline = Pipeline.new(em, services)
+          pipeline.for([ ExceptionStage ]).notify(message)
 
-        a_msg.should_receive(:broken!)
-
-        pipeline = Pipeline.new(em, services)
-        pipeline.for([BrokenStage]).notify(a_msg)
+        end.to raise_error("Boo!")
       end
 
       it "flags the message as consumed if it goes through all stages" do
-        stages = [Passthrough, AddOne, Passthrough, SquareIt, Passthrough]
+        stages = [ Passthrough, AddOne, Passthrough, SquareIt, Passthrough ]
         pipelines = Pipeline.new(em, services)
-        pipeline = pipelines.for(stages)
-        a_msg = msg({:data => 1})
-        a_msg.should_receive(:consumed!)
+        message.should_receive(:consumed!)
 
-        pipeline.notify(a_msg)
+        pipelines.for(stages).notify(message)
       end
     end
   end
