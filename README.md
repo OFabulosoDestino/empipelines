@@ -15,9 +15,7 @@ cannot process it, probably due to some temporary problem.
 * Make wiring easier
 * Example apps
 * Evented I/O for IOEventSource
-* Consolidate logger and monitoring
-* Default monitoring implementation
 * Performance testing
-* Detect insonsistency when handler didnt consume or pass message ahead
+* Detect insonsistency when handler didn't consume or pass message ahead
 * Is callback in the stage's signature redundant? Could we just return
 the message?
