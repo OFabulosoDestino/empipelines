@@ -1,5 +1,5 @@
-require 'empipelines'
-require File.join(File.dirname(__FILE__), '..', 'spec_helper')
+require "empipelines"
+require File.join(File.dirname(__FILE__), "..", "spec_helper")
 
 module EmPipelines
   describe MessageValidity do
