@@ -59,15 +59,6 @@ Cucumber::Rake::Task.new(:all_features) do |t|
   t.cucumber_opts = "--format pretty"
 end
 
-desc "Resets localhost's rabbitmq"
-task :reset_rabbitmq do
-  # sh 'ps aux | grep rabbitmq | grep -v grep')
-  # sh 'rabbitmqctl stop_app; echo 0'
-  # sh 'rabbitmqctl reset; echo 0'
-  # sh 'rabbitmqctl start_app'
-  sh 'rabbitmq-server'
-end
-
 def spec(dir)
   puts "---------- #{dir} tests... ----------"
   all = FileList["#{dir}/**/*_spec.rb"]
@@ -81,14 +72,21 @@ end
 
 desc "Run functional tests"
 task :functional do
-  # Rake::Task['reset_rabbitmq'].invoke
   spec('functional')
+end
+
+
+desc "Resets localhost's rabbitmq"
+task :reset_rabbitmq do
+#  sh 'rabbitmqctl stop_app; echo 0'
+#  sh 'rabbitmqctl reset; echo 0'
+#  sh 'rabbitmqctl start_app'
 end
 
 task :ci => [:unit, :functional, :build]
 
 desc "MUST BE RUN (AND PASS!) BEFORE CHECKING IN CODE!"
-task :pre_checkin => [:ci]
+task :pre_checkin => [:reset_rabbitmq, :ci]
 
 #############################################################################
 #
