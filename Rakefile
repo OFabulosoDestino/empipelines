@@ -60,9 +60,7 @@ Cucumber::Rake::Task.new(:all_features) do |t|
 end
 
 def spec(dir)
-  puts "---------- #{dir} tests... ----------"
-  all = FileList["#{dir}/**/*_spec.rb"]
-  sh "rspec --color  #{all}"
+  sh "rspec #{dir}"
 end
 
 desc "Runs unit tests"

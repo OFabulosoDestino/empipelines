@@ -1,6 +1,7 @@
 require "active_support/core_ext/object/try"
 require "active_support/core_ext/object/blank"
 require "active_support/core_ext/class/attribute_accessors"
+require "empipelines/message_validity/key_validation"
 require "empipelines/message_validity/key_validations/presence"
 require "empipelines/message_validity/key_validations/temporality"
 require "empipelines/message_validity/key_validations/numericality"
