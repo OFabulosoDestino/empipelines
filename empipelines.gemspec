@@ -59,21 +59,21 @@ Gem::Specification.new do |s|
     lib/empipelines/message_validity/key_validations/temporality.rb
     lib/empipelines/pipeline.rb
     lib/empipelines/stage.rb
-    unit/empipelines/event_pipeline_spec.rb
-    unit/empipelines/event_source_spec.rb
-    unit/empipelines/event_sources/aggregated_event_source_spec.rb
-    unit/empipelines/event_sources/amqp_event_source_spec.rb
-    unit/empipelines/event_sources/batch_event_source_spec.rb
-    unit/empipelines/event_sources/empty_io_event_source.dat
-    unit/empipelines/event_sources/io_event_source.dat
-    unit/empipelines/event_sources/io_event_source_spec.rb
-    unit/empipelines/event_sources/periodic_event_source_spec.rb
-    unit/empipelines/message_spec.rb
-    unit/empipelines/message_validity/key_validation_spec.rb
-    unit/empipelines/message_validity_spec.rb
-    unit/empipelines/pipeline_spec.rb
-    unit/spec_helper.rb
-    unit/stage_helper.rb
+    spec/empipelines/event_pipeline_spec.rb
+    spec/empipelines/event_source_spec.rb
+    spec/empipelines/event_sources/aggregated_event_source_spec.rb
+    spec/empipelines/event_sources/amqp_event_source_spec.rb
+    spec/empipelines/event_sources/batch_event_source_spec.rb
+    spec/empipelines/event_sources/empty_io_event_source.dat
+    spec/empipelines/event_sources/io_event_source.dat
+    spec/empipelines/event_sources/io_event_source_spec.rb
+    spec/empipelines/event_sources/periodic_event_source_spec.rb
+    spec/empipelines/message_spec.rb
+    spec/empipelines/message_validity/key_validation_spec.rb
+    spec/empipelines/message_validity_spec.rb
+    spec/empipelines/pipeline_spec.rb
+    spec/spec_helper.rb
+    spec/stage_helper.rb
   ]
   # = MANIFEST =
 
