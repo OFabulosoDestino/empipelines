@@ -11,7 +11,7 @@ previous stage it should not be broken, just rejected.
 * **Rejected:** The message is correct but this pipeline instance
 cannot process it, probably due to some temporary problem.
 
-## TODO
+### TODO
 * Make wiring easier
 * Example apps
 * Evented I/O for IOEventSource
