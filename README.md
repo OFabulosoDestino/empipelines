@@ -1,5 +1,5 @@
 # EmPipelines
-[![Build Status](https://secure.travis-ci.org/pcalcado/empipelines.png)](http://travis-ci.org/pcalcado/empipelines)
+[![Build Status](https://secure.travis-ci.org/soundcloud/empipelines.png?branch=message_validity)](http://travis-ci.org/soundcloud/empipelines?branch=message_validity)
 
 ## Message States
 
