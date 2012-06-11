@@ -1,7 +1,5 @@
 require "amqp"
 require "empipelines"
-require "devnull"
-require "spec_helper"
 
 ExchangeName  = "empipelines.build"
 QueueName     = "empipelines.build.queue"

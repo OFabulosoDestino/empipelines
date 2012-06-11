@@ -1,6 +1,5 @@
-require "logger"
-require "devnull"
+require 'logger'
 
-def mock_logging(output = false)
-  Logger.new(output ? $stdout : DevNull.new )
+def mock_logging
+  stub(info: nil)
 end

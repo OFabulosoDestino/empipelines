@@ -85,7 +85,7 @@ module EmPipelines
   end
 
   describe Pipeline do
-    let(:logging) { mock_logging(false) }
+    let(:logging) { mock_logging }
     let(:em) { MockEM.new }
     let(:services) { { :foo => 4, :bar => Object.new, :baz => "a thing!", :logging => logging } }
     let(:stages) { [ AddOne, SquareIt, Passthrough ] }
